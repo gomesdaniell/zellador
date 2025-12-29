@@ -21,8 +21,9 @@ export default function HomePage() {
 
           <div className="topbar__cta">
             <a className="btn btn--ghost" href="#contato">Quero conhecer</a>
-            <a className="btn btn--primary" href="/app">Entrar</a>
+            <a className="btn btn--primary" href="/login?mode=signup">Experimente grátis</a>
           </div>
+
         </div>
       </header>
 
@@ -40,10 +41,15 @@ export default function HomePage() {
               sem planilhas espalhadas, sem perda de histórico e com acesso por perfil.
             </p>
 
-            <div className="hero__actions">
-              <a className="btn btn--primary" href="#contato">Quero uma demonstração</a>
-              <a className="btn btn--ghost" href="#recursos">Ver recursos</a>
-            </div>
+           <div className="hero__actions">
+            <a className="btn btn--primary" href="/login?mode=signup">Experimente grátis por 30 dias</a>
+            <a className="btn btn--ghost" href="#recursos">Ver recursos</a>
+          </div>
+
+<p className="hero__fineprint">
+  30 dias grátis • sem compromisso • você pode cancelar quando quiser
+</p>
+
 
             <div className="hero__proof">
               <div className="proof">
@@ -233,6 +239,63 @@ export default function HomePage() {
         </div>
       </section>
 
+<section id="trial" className="section">
+  <div className="container">
+    <div className="sales">
+      <div className="sales__copy">
+        <h2>Experimente sem compromisso por 30 dias</h2>
+        <p>
+          Se você sente que a casa está “crescendo no braço”, o Zellador entra pra organizar sem travar a energia do dia a dia.
+          É uma plataforma <strong>simples</strong>, <strong>amigável</strong> e <strong>intuitiva</strong> — feita pra funcionar no celular.
+        </p>
+
+        <div className="sales__bullets">
+          <div className="bullet">
+            <strong>Você começa pelo básico</strong>
+            <span>cadastro + calendário + organização do financeiro do mês.</span>
+          </div>
+          <div className="bullet">
+            <strong>Menos ruído no WhatsApp</strong>
+            <span>informação fica no lugar certo e o grupo vira só comunicação.</span>
+          </div>
+          <div className="bullet">
+            <strong>Controle de acesso</strong>
+            <span>quem sai, perde acesso — sem “trocar link de todo mundo”.</span>
+          </div>
+          <div className="bullet">
+            <strong>Transparência na medida certa</strong>
+            <span>painéis claros sem expor lançamentos individuais quando você não quiser.</span>
+          </div>
+        </div>
+
+        <div className="sales__actions">
+          <a className="btn btn--primary" href="/login?mode=signup">Quero testar 30 dias grátis</a>
+          <a className="btn btn--ghost" href="#como-funciona">Entender o passo a passo</a>
+        </div>
+
+        <p className="sales__micro">
+          Sem compromisso: se não fizer sentido, você para. Se fizer, você ganha continuidade, histórico e rotina.
+        </p>
+      </div>
+
+      <aside className="sales__card">
+        <h3>O que você sente na prática</h3>
+        <ul>
+          <li>✓ Cadastros organizados e fáceis de achar</li>
+          <li>✓ Agenda clara do mês (giras, estudos, eventos)</li>
+          <li>✓ Visão do financeiro sem planilha “viva”</li>
+          <li>✓ Menos retrabalho e mais padrão</li>
+        </ul>
+
+        <div className="sales__tag">
+          <strong>Dica:</strong> em 1 hora você já coloca a casa “em ordem” com o mínimo padrão.
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+      
       {/* Contact / CTA */}
       <section id="contato" className="cta">
         <div className="container cta__inner">
@@ -243,12 +306,15 @@ export default function HomePage() {
               Eu te mostro um fluxo simples e já deixo um caminho de implantação.
             </p>
 
-            <div className="cta__actions">
-              <a className="btn btn--primary" href="https://wa.me/?text=Quero%20conhecer%20o%20Zellador%20-%20pode%20me%20mostrar%20uma%20demonstra%C3%A7%C3%A3o%3F" target="_blank" rel="noreferrer">
-                Falar no WhatsApp
-              </a>
-              <a className="btn btn--ghost" href="/app">Acessar área do app</a>
-            </div>
+            <h2>Comece agora com 30 dias grátis</h2>
+
+<div className="cta__actions">
+  <a className="btn btn--primary" href="/login?mode=signup">
+    Experimente grátis
+  </a>
+  <a className="btn btn--ghost" href="#recursos">Ver recursos</a>
+</div>
+
 
             <small className="muted">
               Dica: se você ainda não tem rotina de cadastros, eu te ajudo a criar o “mínimo padrão” pra casa rodar sem stress.
