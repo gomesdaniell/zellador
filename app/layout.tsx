@@ -1,18 +1,14 @@
+import "./globals.css";
+
 export const metadata = {
-  title: "Zellador",
-  description: "Zellador - gestão simples para terreiros"
+  title: "Zellador — Gestão inteligente para terreiros",
+  description: "Plataforma online para centralizar cadastros, calendário, giras, financeiro e biblioteca do terreiro.",
 };
 
-export default function RootLayout({
-  children
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
-      <body style={{ margin: 0, fontFamily: "Arial, sans-serif", background: "#f3f4f6" }}>
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
