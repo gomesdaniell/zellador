@@ -110,3 +110,69 @@ details p{ color: var(--muted); margin:10px 0 0; line-height:1.6; }
   .mock__kpi{ grid-template-columns: 1fr; }
   .mock__grid{ grid-template-columns: 1fr; }
 }
+
+.signup{ padding: 64px 0; }
+.signup__grid{
+  display:grid;
+  grid-template-columns: 1.1fr .9fr;
+  gap: 18px;
+  align-items:start;
+}
+.signup__copy h1{ margin-top: 12px; }
+.signup__bullets{
+  display:grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.signup__card{
+  border:1px solid var(--border);
+  background: rgba(7,16,31,.55);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.signup__form{
+  display:grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+.signup__form label{
+  display:grid;
+  gap: 6px;
+}
+.signup__form span{
+  font-weight: 800;
+  font-size: 13px;
+}
+.signup__form input{
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+  outline: none;
+}
+.signup__form input:focus{
+  border-color: rgba(255,255,255,.25);
+}
+
+.signup__msg{
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.06);
+}
+
+.signup__links{
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 920px){
+  .signup__grid{ grid-template-columns: 1fr; }
+  .signup__bullets{ grid-template-columns: 1fr; }
+}
