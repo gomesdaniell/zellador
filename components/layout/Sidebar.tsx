@@ -16,9 +16,9 @@ export default function Sidebar() {
       <hr style={{ margin: "14px 0", borderColor: "var(--border)" }} />
 
       <nav style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        <a href="/app/dashboard"><button style={{ width: "100%" }}>Dashboard</button></a>
+        <a href="app/dashboard"><button style={{ width: "100%" }}>Dashboard</button></a>
         <div className="muted" style={{ marginTop: 8 }}>Financeiro</div>
-        <a href="/app/financeiro/mensalidades"><button style={{ width: "100%" }}>Mensalidades</button></a>
+        <a href="app/financeiro/mensalidades"><button style={{ width: "100%" }}>Mensalidades</button></a>
       </nav>
     </aside>
   );
