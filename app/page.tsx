@@ -147,7 +147,7 @@ export default function HomePage() {
             <h2>Recursos que resolvem dor do dia a dia</h2>
             <p>
               A proposta é a mesma que as melhores plataformas do nicho comunicam: centralizar informações e rotinas do terreiro
-              (cadastros, giras e financeiro) num fluxo simples. :contentReference[oaicite:1]{index=1}
+              (cadastros, giras e financeiro) num fluxo simples.
             </p>
           </div>
 
