@@ -12,12 +12,13 @@ export default function SignupClient() {
   const supabase = supabaseBrowser();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") || "/app";
+  const next = searchParams.get("next") || "/app/dashboard";
 
   const [fullName, setFullName] = useState("");
   const [houseName, setHouseName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -32,29 +33,44 @@ export default function SignupClient() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!canSubmit) return;
+    if (!canSubmit || loading) return;
 
     setMsg(null);
     setLoading(true);
 
     try {
+      // 1) CRIA USUÁRIO
       const { error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password,
-        options: { data: { full_name: fullName.trim() } },
+        options: {
+          data: { full_name: fullName.trim() },
+        },
       });
       if (signUpError) throw signUpError;
 
-      await supabase.auth.signInWithPassword({
+      // 2) GARANTE LOGIN (sessão)
+      const { error: loginError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
+      if (loginError) throw loginError;
 
-      try {
-        localStorage.setItem("zellador_pref_house_name", houseName.trim());
-      } catch {}
+      // 3) CRIA A CASA (SERVER → respeita RLS)
+      const resp = await fetch("/api/houses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: houseName.trim() }),
+      });
 
-      window.location.assign(next);
+      const json = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
+        throw new Error(json?.error || "Erro ao criar a casa.");
+      }
+
+      // 4) ENTRA NO APP
+      router.replace(next);
+      router.refresh();
 
     } catch (err: any) {
       setMsg(err?.message ?? "Erro ao criar conta.");
@@ -92,7 +108,7 @@ export default function SignupClient() {
 
             <label>
               <span>E-mail</span>
-              <input value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </label>
 
             <label>
@@ -111,3 +127,4 @@ export default function SignupClient() {
     </main>
   );
 }
+
