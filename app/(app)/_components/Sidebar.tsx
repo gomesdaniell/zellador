@@ -16,32 +16,32 @@ type NavGroup = {
 
 const NAV: NavGroup[] = [
   {
-    items: [{ label: "Dashboard", href: "/app/dashboard", icon: "🏠" }],
+    items: [{ label: "Dashboard", href: "/dashboard", icon: "🏠" }],
   },
   {
     title: "Rotina da Casa",
     items: [
-      { label: "Membros", href: "/app/membros", icon: "👥" },
-      { label: "Giras", href: "/app/giras", icon: "🕯️" },
-      { label: "Camarinhas", href: "/app/camarinhas", icon: "🧺" },
-      { label: "Eventos", href: "/app/eventos", icon: "📅" },
-      { label: "Arrecadação", href: "/app/arrecadacao", icon: "🧾" },
-      { label: "Pontos", href: "/app/pontos", icon: "🎵" },
-      { label: "Agenda", href: "/app/agenda", icon: "🗓️" },
-      { label: "Comunicados", href: "/app/comunicados", icon: "📣" },
-      { label: "Pedido de reza", href: "/app/pedidos-de-reza", icon: "🙏" },
+      { label: "Membros", href: "/membros", icon: "👥" },
+      { label: "Giras", href: "/giras", icon: "🕯️" },
+      { label: "Camarinhas", href: "/camarinhas", icon: "🧺" },
+      { label: "Eventos", href: "/eventos", icon: "📅" },
+      { label: "Arrecadação", href: "/arrecadacao", icon: "🧾" },
+      { label: "Pontos", href: "/pontos", icon: "🎵" },
+      { label: "Agenda", href: "/agenda", icon: "🗓️" },
+      { label: "Comunicados", href: "/comunicados", icon: "📣" },
+      { label: "Pedido de reza", href: "/pedidos-de-reza", icon: "🙏" },
     ],
   },
   {
     title: "Gestão",
     items: [
-      { label: "Financeiro", href: "/app/financeiro", icon: "💰" },
-      { label: "Estoque", href: "/app/estoque", icon: "📦" },
+      { label: "Financeiro", href: "/financeiro", icon: "💰" },
+      { label: "Estoque", href: "/estoque", icon: "📦" },
     ],
   },
   {
     title: "Sistema",
-    items: [{ label: "Configurações", href: "/app/configuracoes", icon: "⚙️" }],
+    items: [{ label: "Configurações", href: "/configuracoes", icon: "⚙️" }],
   },
 ];
 
