@@ -49,7 +49,7 @@ export default function LoginPage() {
                 <a href="/esqueci-senha">Esqueci minha senha</a>
               </div>
 
-              <a href="/dashboard" className="btn btn--primary login__btnFull">
+              <a href="/home" className="btn btn--primary login__btnFull">
               Confirmar
               </a>
 
