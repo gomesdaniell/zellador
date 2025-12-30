@@ -1,7 +1,8 @@
-{ label:"use client";
+"use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+
 
 const MEMBERS_KEY = "zellador:members:v1";
 
