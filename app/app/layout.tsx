@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { supabaseServer } from "../../lib/supabase/server";
-import AppHeader from "./AppHeader";
+import AppHeader from "./Header";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -20,7 +20,7 @@ export default async function AppLayout({
   return (
     <>
       <AppHeader />
-      {children}
+      <main>{children}</main>
     </>
   );
 }
