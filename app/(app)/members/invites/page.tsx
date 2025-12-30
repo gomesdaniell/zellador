@@ -3,10 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 
 type InviteRole = "medium" | "consulente";
-return list.filter((inv) =>
-  `${inv.token} ${inv.role}`.toLowerCase().includes(t)
-);
-
 
 type Invite = {
   id: string;
@@ -15,7 +11,6 @@ type Invite = {
   created_at: string;
   expires_at: string | null;
   used_at: string | null;
-  status: InviteStatus;
 };
 
 export default function MembersInvitesPage() {
@@ -30,19 +25,27 @@ export default function MembersInvitesPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  /* =========================
+     HOUSE ATIVA (MVP)
+  ========================== */
+  useEffect(() => {
+    fetch("/api/me/house")
+      .then((r) => r.json())
+      .then((d) => setActiveHouseId(d.house_id))
+      .catch(() => setActiveHouseId(null));
+  }, []);
+
+  /* =========================
+     TOAST
+  ========================== */
   function showToast(msg: string) {
     setToast(msg);
     setTimeout(() => setToast(null), 1800);
   }
 
-  // 🔹 busca casa ativa (backend decide)
-  useEffect(() => {
-    fetch("/api/me/house")
-      .then((r) => r.json())
-      .then((d) => setActiveHouseId(d.house_id ?? null))
-      .catch(() => setActiveHouseId(null));
-  }, []);
-
+  /* =========================
+     LOAD INVITES
+  ========================== */
   async function loadInvites() {
     const res = await fetch("/api/invites");
     const json = await res.json();
@@ -53,17 +56,24 @@ export default function MembersInvitesPage() {
     loadInvites();
   }, []);
 
+  /* =========================
+     FILTER
+  ========================== */
   const filtered = useMemo(() => {
     const t = q.trim().toLowerCase();
     if (!t) return list;
+
     return list.filter((inv) =>
-      `${inv.token} ${inv.role} ${inv.status}`.toLowerCase().includes(t)
+      `${inv.token} ${inv.role}`.toLowerCase().includes(t)
     );
   }, [q, list]);
 
+  /* =========================
+     CREATE INVITE
+  ========================== */
   async function createInvite() {
     if (!activeHouseId) {
-      showToast("Casa ativa não encontrada.");
+      showToast("Casa ativa não encontrada");
       return;
     }
 
@@ -93,67 +103,63 @@ export default function MembersInvitesPage() {
     loadInvites();
   }
 
+  /* =========================
+     LINKS
+  ========================== */
   function inviteLink(token: string) {
     return `${window.location.origin}/onboarding/${token}`;
   }
 
   async function copyLink(token: string) {
-    const link = inviteLink(token);
-    await navigator.clipboard.writeText(link);
+    await navigator.clipboard.writeText(inviteLink(token));
     showToast("Link copiado!");
   }
 
   function openWhatsApp(token: string) {
-    const link = inviteLink(token);
     const msg =
       `Olá! Segue seu link para cadastro no Zellador:\n\n` +
-      `➡️ ${link}\n\n` +
+      `➡️ ${inviteLink(token)}\n\n` +
       `Qualquer dúvida, me chama por aqui.`;
+
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
   }
 
+  /* =========================
+     RENDER
+  ========================== */
   return (
     <div className="page">
-      <div className="listTop">
-        <h1 className="listTitle">Convites</h1>
-      </div>
+      <h1>Convites</h1>
 
       {toast && <div className="toast">{toast}</div>}
 
-      {/* Criar convite */}
       <div className="panel">
-        <div className="panelHeader">
-          <h2>Criar convite</h2>
-        </div>
+        <h2>Criar convite</h2>
 
-        <div className="panelBody">
-          <select value={role} onChange={(e) => setRole(e.target.value as InviteRole)}>
-            <option value="medium">Médium</option>
-            <option value="consulente">Consulente</option>
-          </select>
+        <select value={role} onChange={(e) => setRole(e.target.value as InviteRole)}>
+          <option value="medium">Médium</option>
+          <option value="consulente">Consulente</option>
+        </select>
 
-          <select value={expiryDays} onChange={(e) => setExpiryDays(e.target.value)}>
-            <option value="7">7 dias</option>
-            <option value="15">15 dias</option>
-            <option value="30">30 dias</option>
-            <option value="never">Sem expiração</option>
-          </select>
+        <select value={expiryDays} onChange={(e) => setExpiryDays(e.target.value)}>
+          <option value="7">7 dias</option>
+          <option value="15">15 dias</option>
+          <option value="30">30 dias</option>
+          <option value="never">Sem expiração</option>
+        </select>
 
-          <button className="btnPrimary" disabled={loading} onClick={createInvite}>
-            {loading ? "Gerando..." : "Gerar link"}
-          </button>
-        </div>
+        <button disabled={loading} onClick={createInvite}>
+          {loading ? "Gerando..." : "Gerar link"}
+        </button>
       </div>
 
-      {/* Busca */}
       <input
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder="Buscar por token, tipo ou status…"
+        placeholder="Buscar por token ou tipo…"
       />
 
-      {/* Lista */}
-      <table className="table">
+      <table>
         <thead>
           <tr>
             <th>Tipo</th>
@@ -164,26 +170,33 @@ export default function MembersInvitesPage() {
           </tr>
         </thead>
         <tbody>
-          {filtered.map((inv) => (
-            <tr key={inv.id}>
-              <td>{inv.role === "medium" ? "Médium" : "Consulente"}</td>
-              <td>{inv.token}</td>
-              <td>
-  {inv.used_at
-    ? "Usado"
-    : inv.expires_at && new Date(inv.expires_at) < new Date()
-    ? "Expirado"
-    : "Ativo"}
-</td>
+          {filtered.map((inv) => {
+            const status = inv.used_at
+              ? "Usado"
+              : inv.expires_at && new Date(inv.expires_at) < new Date()
+              ? "Expirado"
+              : "Ativo";
 
-              <td>{inv.expires_at ? new Date(inv.expires_at).toLocaleDateString() : "—"}</td>
-              <td style={{ display: "flex", gap: 8 }}>
-                <button onClick={() => copyLink(inv.token)}>Copiar</button>
-                <button onClick={() => openWhatsApp(inv.token)}>WhatsApp</button>
-                <a href={inviteLink(inv.token)} target="_blank">Abrir</a>
-              </td>
-            </tr>
-          ))}
+            return (
+              <tr key={inv.id}>
+                <td>{inv.role === "medium" ? "Médium" : "Consulente"}</td>
+                <td>{inv.token}</td>
+                <td>{status}</td>
+                <td>
+                  {inv.expires_at
+                    ? new Date(inv.expires_at).toLocaleDateString()
+                    : "—"}
+                </td>
+                <td>
+                  <button onClick={() => copyLink(inv.token)}>Copiar</button>
+                  <button onClick={() => openWhatsApp(inv.token)}>WhatsApp</button>
+                  <a href={inviteLink(inv.token)} target="_blank">
+                    Abrir
+                  </a>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
