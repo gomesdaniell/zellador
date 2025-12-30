@@ -1,29 +1,39 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-export async function GET(_req: Request, context: any) {
-  const token = context.params.token;
-
+export async function GET(
+  req: Request,
+  { params }: { params: { token: string } }
+) {
   const supabase = createClient(
     process.env.SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { persistSession: false } }
   );
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("invites")
-    .select("*")
-    .eq("token", token)
-    .is("used_at", null)
+    .select("id, token, role, house_id, expires_at, used_at")
+    .eq("token", params.token)
     .maybeSingle();
 
-  if (!data) {
-    return NextResponse.json({ error: "not_found" }, { status: 404 });
+  if (error || !data) {
+    return NextResponse.json({ error: "Convite não encontrado" }, { status: 404 });
+  }
+
+  if (data.used_at) {
+    return NextResponse.json({ error: "Convite já utilizado" }, { status: 410 });
   }
 
   if (data.expires_at && new Date(data.expires_at) < new Date()) {
-    return NextResponse.json({ error: "expired" }, { status: 410 });
+    return NextResponse.json({ error: "Convite expirado" }, { status: 410 });
   }
 
-  return NextResponse.json({ invite: data });
+  // 🔑 ISSO AQUI É O QUE FALTAVA
+  return NextResponse.json({
+    id: data.id,
+    token: data.token,
+    role: data.role,
+    house_id: data.house_id,
+  });
 }
