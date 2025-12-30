@@ -54,8 +54,8 @@ export default function SignupClient() {
         localStorage.setItem("zellador_pref_house_name", houseName.trim());
       } catch {}
 
-      router.push(next);
-      router.refresh();
+      window.location.assign(next);
+
     } catch (err: any) {
       setMsg(err?.message ?? "Erro ao criar conta.");
     } finally {
