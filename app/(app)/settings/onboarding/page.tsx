@@ -201,6 +201,16 @@ export default function SettingsOnboardingPage() {
         </div>
       </div>
 
+      <div style={{ display: "flex", gap: 12 }}>
+  <button onClick={() => gerarConvite("medium")}>
+    Gerar convite – Médium
+  </button>
+
+  <button onClick={() => gerarConvite("consulente")}>
+    Gerar convite – Consulente
+  </button>
+</div>
+
       {savedToast && <div className="toast">{savedToast}</div>}
 
       <div className="settingsGrid">
