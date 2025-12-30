@@ -49,29 +49,31 @@ export default function MembersInvitesPage() {
   }, [q, list]);
 
   async function createInvite() {
-    setLoading(true);
-    const days = expiryDays === "never" ? null : Number(expiryDays);
+  setLoading(true);
 
-    const res = await fetch("/api/invites", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        role,
-        days,
-      }),
-    });
+  const days = expiryDays === "never" ? null : Number(expiryDays);
 
-    const json = await res.json();
-    setLoading(false);
+  const res = await fetch("/api/invites", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      house_id: activeHouseId, // 👈 OBRIGATÓRIO
+      role,
+      days,
+    }),
+  });
 
-    if (!res.ok) {
-      showToast(json?.error || "Erro ao criar convite");
-      return;
-    }
+  const json = await res.json();
+  setLoading(false);
 
-    showToast("Convite criado!");
-    loadInvites();
+  if (!res.ok) {
+    showToast(json?.error || "Erro ao criar convite");
+    return;
   }
+
+  showToast("Convite criado!");
+  loadInvites();
+}
 
   function inviteLink(token: string) {
     return `${window.location.origin}/onboarding/${token}`;
