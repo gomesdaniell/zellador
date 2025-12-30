@@ -41,4 +41,124 @@ export default function MembersInvitesPage() {
   }, []);
 
   const filtered = useMemo(() => {
-    const t = q.trim().toLo
+    const t = q.trim().toLowerCase();
+    if (!t) return list;
+    return list.filter((inv) =>
+      `${inv.token} ${inv.role} ${inv.status}`.toLowerCase().includes(t)
+    );
+  }, [q, list]);
+
+  async function createInvite() {
+    setLoading(true);
+    const days = expiryDays === "never" ? null : Number(expiryDays);
+
+    const res = await fetch("/api/invites", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        role,
+        days,
+      }),
+    });
+
+    const json = await res.json();
+    setLoading(false);
+
+    if (!res.ok) {
+      showToast(json?.error || "Erro ao criar convite");
+      return;
+    }
+
+    showToast("Convite criado!");
+    loadInvites();
+  }
+
+  function inviteLink(token: string) {
+    return `${window.location.origin}/onboarding/${token}`;
+  }
+
+  async function copyLink(token: string) {
+    const link = inviteLink(token);
+    await navigator.clipboard.writeText(link);
+    showToast("Link copiado!");
+  }
+
+  function openWhatsApp(token: string) {
+    const link = inviteLink(token);
+    const msg =
+      `Olá! Segue seu link para cadastro no Zellador:\n\n` +
+      `➡️ ${link}\n\n` +
+      `Qualquer dúvida, me chama por aqui.`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+  }
+
+  return (
+    <div className="page">
+      <div className="listTop">
+        <h1 className="listTitle">Convites</h1>
+      </div>
+
+      {toast && <div className="toast">{toast}</div>}
+
+      {/* Criar convite */}
+      <div className="panel">
+        <div className="panelHeader">
+          <h2>Criar convite</h2>
+        </div>
+
+        <div className="panelBody">
+          <select value={role} onChange={(e) => setRole(e.target.value as InviteRole)}>
+            <option value="medium">Médium</option>
+            <option value="consulente">Consulente</option>
+          </select>
+
+          <select value={expiryDays} onChange={(e) => setExpiryDays(e.target.value)}>
+            <option value="7">7 dias</option>
+            <option value="15">15 dias</option>
+            <option value="30">30 dias</option>
+            <option value="never">Sem expiração</option>
+          </select>
+
+          <button className="btnPrimary" disabled={loading} onClick={createInvite}>
+            {loading ? "Gerando..." : "Gerar link"}
+          </button>
+        </div>
+      </div>
+
+      {/* Busca */}
+      <input
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="Buscar por token, tipo ou status…"
+      />
+
+      {/* Lista */}
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Token</th>
+            <th>Status</th>
+            <th>Expira</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filtered.map((inv) => (
+            <tr key={inv.id}>
+              <td>{inv.role === "medium" ? "Médium" : "Consulente"}</td>
+              <td>{inv.token}</td>
+              <td>{inv.status}</td>
+              <td>{inv.expires_at ? new Date(inv.expires_at).toLocaleDateString() : "—"}</td>
+              <td style={{ display: "flex", gap: 8 }}>
+                <button onClick={() => copyLink(inv.token)}>Copiar</button>
+                <button onClick={() => openWhatsApp(inv.token)}>WhatsApp</button>
+                <a href={inviteLink(inv.token)} target="_blank">Abrir</a>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
