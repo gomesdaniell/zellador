@@ -509,3 +509,95 @@ button.sidebar__item:focus{
   background: rgba(255,255,255,.06);
   border: 1px solid rgba(255,255,255,.10);
 }
+
+
+/* ====== Settings: Onboarding ====== */
+.settingsGrid{
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 980px){
+  .settingsGrid{ grid-template-columns: 1fr; }
+}
+
+.panel{
+  border-radius: 16px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  overflow: hidden;
+}
+
+.panelHeader{
+  padding: 14px 16px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.panelTitle{
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.panelBody{
+  padding: 14px 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.checkRow{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.field textarea{
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color: inherit;
+  outline: none;
+  resize: vertical;
+  min-height: 120px;
+}
+
+.previewBox{
+  white-space: pre-wrap;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.18);
+  color: inherit;
+}
+
+.badge{
+  font-size: 12px;
+  font-weight: 800;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(45,108,255,.18);
+  border: 1px solid rgba(45,108,255,.35);
+}
+
+.badgeSoft{
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.14);
+}
+
+.toast{
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(21, 128, 61, .18);
+  border: 1px solid rgba(21, 128, 61, .35);
+  font-weight: 700;
+}
