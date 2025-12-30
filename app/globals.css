@@ -430,3 +430,24 @@ details p{ color: var(--muted); margin:10px 0 0; line-height:1.6; }
 .cardLink:hover{ background: rgba(255,255,255,.09); }
 .cardLink__icon{ font-size: 24px; }
 .muted{ opacity: .72; font-size: 13px; margin-top: 4px; }
+
+
+/* === Dropdown do Membros === */
+.sidebar__submenu{
+  display: grid;
+  gap: 6px;
+  margin: 6px 0 10px 0;
+  padding-left: 8px;
+}
+
+/* deixa button igual ao link (a.sidebar__item) */
+button.sidebar__item{
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+button.sidebar__item:focus{
+  outline: none;
+}
