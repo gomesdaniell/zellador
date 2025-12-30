@@ -377,3 +377,28 @@ details p{ color: var(--muted); margin:10px 0 0; line-height:1.6; }
     pointer-events: auto;
   }
 }
+
+
+.sidebar__chev{
+  float:right;
+  opacity:.65;
+  font-weight:700;
+}
+
+.sidebar__item.is-child{
+  margin-left: 14px;
+  padding-left: 14px;
+  position: relative;
+}
+
+.sidebar__item.is-child::before{
+  content:"";
+  position:absolute;
+  left: 10px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 99px;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,.35);
+}
