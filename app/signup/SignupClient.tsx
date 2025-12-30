@@ -73,10 +73,14 @@ export default function SignupClient() {
       router.refresh();
 
     } catch (err: any) {
-      setMsg(err?.message ?? "Erro ao criar conta.");
-    } finally {
-      setLoading(false);
-    }
+  console.error("SIGNUP ERROR =>", err);
+  setMsg(
+    typeof err?.message === "string"
+      ? err.message
+      : JSON.stringify(err, null, 2)
+  );
+}
+
   }
 
   return (
