@@ -451,3 +451,60 @@ button.sidebar__item{
 button.sidebar__item:focus{
   outline: none;
 }
+
+
+/* ====== Pages (MVP lists) ====== */
+.page{ padding: 18px; }
+
+.listTop{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.listTitle{
+  margin:0;
+  font-size: 56px;         /* igual seu print grande */
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.listActions{
+  margin-top: 14px;
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btnPrimary{
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  background: #2d6cff;
+  color: white;
+  font-weight: 700;
+}
+
+.btnPrimary:hover{ filter: brightness(1.05); }
+
+.btnGhost{
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+  color: inherit;
+  font-weight: 600;
+}
+
+.btnGhost:hover{ background: rgba(255,255,255,.09); }
+
+.searchBox{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
