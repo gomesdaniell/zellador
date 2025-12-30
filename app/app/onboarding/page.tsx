@@ -51,7 +51,7 @@ export default function OnboardingPage() {
 
       // 2) cria membership owner
       const { error: e2 } = await supabase
-        .from("memberships")
+        .from("house_users")
         .insert({ user_id: user.id, house_id: house.id, role: "owner" });
 
       if (e2) throw e2;
