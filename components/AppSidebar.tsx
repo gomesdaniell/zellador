@@ -52,18 +52,29 @@ export default function AppSidebar() {
       // 🔐 Itens preparados para permissões
       { type: "link", label: "Financeiro", href: "/financeiro", restrictedTo: ["finance", "admin", "owner"] },
       { type: "link", label: "Estoque", href: "/estoque", restrictedTo: ["stock", "admin", "owner"] },
+
+  {
+    type: "group",
+    label: "Configurações",
+    key: "config",
+    children: [
       { type: "link", label: "Configurações", href: "/configuracoes", restrictedTo: ["admin", "owner"] },
       { type: "link", label: "Terreiro", href: "/terreiro", restrictedTo: ["owner"] },
       { type: "link", label: "Criar APP", href: "/criar-app", restrictedTo: ["owner"] },
       { type: "link", label: "Minha assinatura", href: "/minha-assinatura", restrictedTo: ["owner"] },
     ],
+  },
+
+    ],
     []
   );
 
-  const [open, setOpen] = useState<Record<string, boolean>>({
-    membros: true,
-    giras: true,
-  });
+ const [open, setOpen] = useState<Record<string, boolean>>({
+  membros: false,
+  giras: false,
+  config: false,
+});
+
 
   function isAllowed(item: NavItem) {
     if (item.type === "group") return true;
