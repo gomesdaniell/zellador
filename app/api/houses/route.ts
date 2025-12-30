@@ -14,9 +14,7 @@ function slugifyBase(s: string) {
 
 async function makeUniqueSlug(supabase: any, name: string) {
   const base = slugifyBase(name) || "casa";
-  let slug = base;
 
-  // tenta base, base-2, base-3...
   for (let i = 0; i < 50; i++) {
     const candidate = i === 0 ? base : `${base}-${i + 1}`;
 
@@ -27,18 +25,15 @@ async function makeUniqueSlug(supabase: any, name: string) {
       .maybeSingle();
 
     if (error) throw error;
-    if (!data) {
-      slug = candidate;
-      break;
-    }
+    if (!data) return candidate;
   }
 
-  return slug;
+  // fallback muito improvável
+  return `${base}-${Date.now()}`;
 }
 
 export async function POST(req: Request) {
   const cookieStore = await cookies();
-
   const cookiesToSet: Array<{ name: string; value: string; options: any }> = [];
 
   const supabase = createServerClient(
@@ -97,11 +92,25 @@ export async function POST(req: Request) {
   const { error: e2 } = await supabase.from("house_users").insert({
     user_id: auth.user.id,
     house_id: house.id,
-    role: "admin", // 🔁 troque para o valor correto do seu enum (ex.: "owner", "admin", "manager", etc.)
+    role: "admin", // ajuste conforme seu enum
   });
 
   if (e2) {
     const res = NextResponse.json({ error: e2.message }, { status: 400 });
+    cookiesToSet.forEach(({ name, value, options }) => res.cookies.set(name, value, options));
+    return res;
+  }
+
+  // 3) ✅ define a casa ativa do usuário (garante profile e seta active_house_id)
+  const { error: e3 } = await supabase
+    .from("profiles")
+    .upsert(
+      { id: auth.user.id, active_house_id: house.id },
+      { onConflict: "id" }
+    );
+
+  if (e3) {
+    const res = NextResponse.json({ error: e3.message }, { status: 400 });
     cookiesToSet.forEach(({ name, value, options }) => res.cookies.set(name, value, options));
     return res;
   }
