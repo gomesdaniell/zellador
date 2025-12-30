@@ -53,10 +53,15 @@ export async function POST(req: Request) {
 
   // 1) cria a casa
   const { data: house, error: e1 } = await supabase
-    .from("houses")
-    .insert({ name, slug: slugify(name) })
-    .select("id")
-    .single();
+  .from("houses")
+  .insert({
+    name,
+    slug: slugify(name),
+    owner_id: auth.user.id, // 🔑 ESSENCIAL
+  })
+  .select("id")
+  .single();
+
 
   if (e1) {
     const res = NextResponse.json({ error: e1.message }, { status: 400 });
