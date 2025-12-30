@@ -1,12 +1,5 @@
-import Sidebar from "@/components/sidebar";
+import AppShell from "./_components/AppShell";
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="min-h-screen bg-white">
-      <div className="flex">
-        <Sidebar />
-        <main className="flex-1">{children}</main>
-      </div>
-    </div>
-  );
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return <AppShell>{children}</AppShell>;
 }
