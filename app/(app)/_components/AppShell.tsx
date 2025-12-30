@@ -10,10 +10,11 @@ const items: Item[] = [
   { label: "Dashboard", href: "/dashboard", icon: "🏠" },
 
   { label: "Membros", href: "/members", icon: "👥", group: "Rotina" },
-  { label: "Médiuns", href: "/members/mediuns", icon: "🧑‍🦳", group: "Rotina" },
-  { label: "Consulentes", href: "/members/consulentes", icon: "🪪", group: "Rotina" },
-  { label: "Convites", href: "/members/invites", icon: "🔗", group: "Rotina" },
-  { label: "Pendentes", href: "/members/pending", icon: "⏳", group: "Rotina" },
+{ label: "Pendentes", href: "/members/pending", icon: "⏳", group: "Rotina" },
+{ label: "Convites", href: "/members/invites", icon: "🔗", group: "Rotina" },
+{ label: "Médiuns", href: "/members/mediuns", icon: "🧑‍🦳", group: "Rotina" },
+{ label: "Consulentes", href: "/members/consulentes", icon: "🪪", group: "Rotina" },
+
 
 
   { label: "Giras", href: "/giras", icon: "🕯️", group: "Rotina" },
