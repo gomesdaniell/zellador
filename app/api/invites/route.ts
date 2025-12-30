@@ -2,20 +2,16 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { nanoid } from "nanoid";
 
-type UiRole = "medium" | "consulente";
-type DbRole = "member" | "consulente"; // <- AJUSTE AQUI se seu enum for outro
+type UiRole = "medium" | "admin";
+type DbRole = "leitura" | "admin";
 
 function mapRole(role: UiRole): DbRole {
-  if (role === "medium") return "member";
-  return "consulente";
+  if (role === "medium") return "leitura";
+  return "admin";
 }
 
 export async function POST(req: Request) {
-  const { house_id, role, days } = (await req.json()) as {
-    house_id: string | null;
-    role: UiRole;
-    days: number | null;
-  };
+  const { house_id, role, days } = await req.json();
 
   if (!house_id) {
     return NextResponse.json({ error: "house_id obrigatório" }, { status: 400 });
@@ -36,7 +32,7 @@ export async function POST(req: Request) {
   const { error } = await supabase.from("invites").insert({
     token,
     house_id,
-    role: mapRole(role), // ✅ manda valor válido pro enum
+    role: mapRole(role), // 🔥 AQUI resolve o erro
     expires_at,
   });
 
@@ -45,9 +41,8 @@ export async function POST(req: Request) {
   }
 
   const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "";
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
 
   return NextResponse.json({
     token,
