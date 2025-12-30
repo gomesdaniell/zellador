@@ -17,7 +17,7 @@ export default function AppSidebar() {
 
   const nav: NavItem[] = useMemo(
     () => [
-      { type: "link", label: "Dashboard", href: "/dashboard" },
+      { type: "link", label: "Home", href: "/home" },
 
       {
         type: "group",
