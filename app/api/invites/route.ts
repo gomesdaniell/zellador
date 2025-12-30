@@ -3,12 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { nanoid } from "nanoid";
 
 export async function POST(req: Request) {
-  const body = await req.json().catch(() => ({}));
-  const { house_id, role, days } = body ?? {};
-
-  if (!house_id) {
-    return NextResponse.json({ error: "house_id obrigatório" }, { status: 400 });
-  }
+  const { house_id, role, days } = await req.json();
 
   const supabase = createClient(
     process.env.SUPABASE_URL!,
@@ -17,7 +12,7 @@ export async function POST(req: Request) {
   );
 
   const token = nanoid(16).toUpperCase();
-  const expiresAt = days
+  const expires_at = days
     ? new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString()
     : null;
 
@@ -25,7 +20,7 @@ export async function POST(req: Request) {
     token,
     house_id,
     role,
-    expires_at: expiresAt,
+    expires_at,
   });
 
   if (error) {
