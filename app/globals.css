@@ -1305,3 +1305,143 @@ button.sidebar__item:focus{
   .tercfg__grid{ grid-template-columns: 1fr; }
   .tercfg__formGrid{ grid-template-columns: 1fr; }
 }
+
+/* ===== MINHA ASSINATURA (isolado) ===== */
+.subsc{ display:flex; flex-direction:column; gap:14px; }
+
+.subsc__head{ display:flex; align-items:flex-start; justify-content:space-between; }
+
+.subsc__grid{
+  display:grid;
+  grid-template-columns: 300px 1fr;
+  gap:14px;
+}
+
+.subsc__card{
+  border:1px solid var(--border);
+  border-radius:16px;
+  background: rgba(255,255,255,.03);
+  box-shadow: var(--shadow);
+}
+
+.subsc__card--pad{ padding:14px; }
+
+.subsc__left .subsc__card{ padding:14px; }
+
+.subsc__cardTitle{
+  font-weight:900;
+  font-size:14px;
+  margin-bottom:12px;
+}
+
+.subsc__kv{
+  display:flex;
+  gap:10px;
+  justify-content:space-between;
+  padding:10px 0;
+  border-top:1px solid rgba(255,255,255,.08);
+}
+
+.subsc__kv:first-of-type{ border-top:none; padding-top:0; }
+
+.subsc__k{
+  color: var(--muted);
+  font-size:12px;
+  font-weight:800;
+}
+
+.subsc__v{
+  color: rgba(232,238,252,.92);
+  font-size:12px;
+  font-weight:900;
+  text-align:right;
+}
+
+.subsc__sectionTitle{
+  font-weight:900;
+  font-size:13px;
+  margin-bottom:10px;
+}
+
+.subsc__infoGrid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:8px;
+}
+
+.subsc__infoRow{
+  display:grid;
+  grid-template-columns: 180px 1fr;
+  gap:10px;
+  align-items:center;
+}
+
+.subsc__status{
+  display:inline-block;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(96,165,250,.22);
+  background: rgba(96,165,250,.12);
+  font-weight:900;
+  font-size:12px;
+}
+
+.subsc__divider{
+  height:1px;
+  background: rgba(255,255,255,.08);
+  margin:14px 0;
+}
+
+.subsc__table{
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:12px;
+  overflow:hidden;
+  background: rgba(255,255,255,.02);
+}
+
+.subsc__thead, .subsc__tr{
+  display:grid;
+  grid-template-columns: 90px 90px 1fr 110px 100px 120px;
+  gap:10px;
+  align-items:center;
+}
+
+.subsc__thead{
+  padding:10px 12px;
+  background: rgba(255,255,255,.06);
+  font-weight:900;
+  font-size:12px;
+  color: rgba(232,238,252,.92);
+}
+
+.subsc__tbody .subsc__tr{
+  padding:10px 12px;
+  border-top:1px solid rgba(255,255,255,.08);
+  font-size:12px;
+  color: rgba(232,238,252,.92);
+}
+
+.subsc__link{
+  color: rgba(96,165,250,.95);
+  font-weight:900;
+}
+
+.subsc__empty{
+  padding:18px 12px;
+}
+
+.subsc__emptyTitle{
+  font-weight:900;
+  margin-bottom:4px;
+}
+
+@media (max-width: 980px){
+  .subsc__grid{ grid-template-columns: 1fr; }
+  .subsc__infoRow{ grid-template-columns: 1fr; }
+  .subsc__v{ text-align:left; }
+  .subsc__thead, .subsc__tr{
+    grid-template-columns: 1fr;
+  }
+  .subsc__thead{ display:none; }
+  .subsc__tbody .subsc__tr{ border-top:none; border-bottom:1px solid rgba(255,255,255,.08); }
+}
