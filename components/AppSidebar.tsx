@@ -72,7 +72,7 @@ export default function AppSidebar() {
  const [open, setOpen] = useState<Record<string, boolean>>({
   membros: false,
   giras: false,
-  config: false,
+  config: true,
 });
 
 
