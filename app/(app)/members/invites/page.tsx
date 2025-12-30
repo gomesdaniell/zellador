@@ -2,13 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-// house_id ativo (MVP: vem do localStorage)
-const activeHouseId =
-  typeof window !== "undefined"
-    ? localStorage.getItem("zellador_active_house_id")
-    : null;
-
-
 type InviteRole = "medium" | "consulente";
 type InviteStatus = "active" | "used" | "disabled" | "expired";
 
@@ -23,6 +16,8 @@ type Invite = {
 };
 
 export default function MembersInvitesPage() {
+  const [activeHouseId, setActiveHouseId] = useState<string | null>(null);
+
   const [list, setList] = useState<Invite[]>([]);
   const [q, setQ] = useState("");
 
@@ -36,6 +31,14 @@ export default function MembersInvitesPage() {
     setToast(msg);
     setTimeout(() => setToast(null), 1800);
   }
+
+  // 🔹 busca casa ativa (backend decide)
+  useEffect(() => {
+    fetch("/api/me/house")
+      .then((r) => r.json())
+      .then((d) => setActiveHouseId(d.house_id ?? null))
+      .catch(() => setActiveHouseId(null));
+  }, []);
 
   async function loadInvites() {
     const res = await fetch("/api/invites");
@@ -56,31 +59,36 @@ export default function MembersInvitesPage() {
   }, [q, list]);
 
   async function createInvite() {
-  setLoading(true);
+    if (!activeHouseId) {
+      showToast("Casa ativa não encontrada.");
+      return;
+    }
 
-  const days = expiryDays === "never" ? null : Number(expiryDays);
+    setLoading(true);
 
-  const res = await fetch("/api/invites", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      house_id: activeHouseId, // 👈 OBRIGATÓRIO
-      role,
-      days,
-    }),
-  });
+    const days = expiryDays === "never" ? null : Number(expiryDays);
 
-  const json = await res.json();
-  setLoading(false);
+    const res = await fetch("/api/invites", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        house_id: activeHouseId,
+        role,
+        days,
+      }),
+    });
 
-  if (!res.ok) {
-    showToast(json?.error || "Erro ao criar convite");
-    return;
+    const json = await res.json();
+    setLoading(false);
+
+    if (!res.ok) {
+      showToast(json?.error || "Erro ao criar convite");
+      return;
+    }
+
+    showToast("Convite criado!");
+    loadInvites();
   }
-
-  showToast("Convite criado!");
-  loadInvites();
-}
 
   function inviteLink(token: string) {
     return `${window.location.origin}/onboarding/${token}`;
