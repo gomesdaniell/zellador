@@ -146,4 +146,57 @@ export default function SignupPage() {
               <div className="signup__section">
                 <div className="signup__sectionHead">
                   <h2>Informações rápidas</h2>
-                  <p className="muted">Opcional (mas ajuda a
+                  <p className="muted">Opcional (mas ajuda a configurar melhor o sistema).</p>
+                </div>
+
+                <div className="signup__grid">
+                  <div className="signup__field">
+                    <label htmlFor="tamanhoCasa">Tamanho da casa</label>
+                    <select id="tamanhoCasa">
+                      <option value="">Selecione</option>
+                      <option value="pequena">Pequena (até 30 pessoas)</option>
+                      <option value="media">Média (31 a 80 pessoas)</option>
+                      <option value="grande">Grande (81+ pessoas)</option>
+                    </select>
+                  </div>
+
+                  <div className="signup__field">
+                    <label htmlFor="girasSemana">Giras/atividades por semana</label>
+                    <select id="girasSemana">
+                      <option value="">Selecione</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4+">4+</option>
+                    </select>
+                  </div>
+
+                  <div className="signup__field signup__field--full">
+                    <label htmlFor="site">Instagram / Site (se tiver)</label>
+                    <input id="site" placeholder="https://instagram.com/..." />
+                  </div>
+                </div>
+              </div>
+
+              {/* AÇÕES */}
+              <div className="signup__actions">
+                <button type="submit" className="btn btn--primary signup__btnFull">
+                  Criar conta e iniciar teste
+                </button>
+
+                <div className="signup__footer">
+                  <a className="btn btn--ghost" href="/login">Já tenho conta (Login)</a>
+                  <a className="btn btn--ghost" href="/">Voltar</a>
+                </div>
+
+                <p className="muted signup__micro">
+                  * Por enquanto isso é só tela. A lógica de criação/validação entra depois.
+                </p>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
