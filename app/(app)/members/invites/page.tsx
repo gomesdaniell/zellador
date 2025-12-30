@@ -2,6 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+// house_id ativo (MVP: vem do localStorage)
+const activeHouseId =
+  typeof window !== "undefined"
+    ? localStorage.getItem("zellador_active_house_id")
+    : null;
+
+
 type InviteRole = "medium" | "consulente";
 type InviteStatus = "active" | "used" | "disabled" | "expired";
 
