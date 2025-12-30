@@ -49,9 +49,10 @@ export default function LoginPage() {
                 <a href="/esqueci-senha">Esqueci minha senha</a>
               </div>
 
-              <button type="submit" className="btn btn--primary login__btnFull">
-                Confirmar
-              </button>
+              <a href="/dashboard" className="btn btn--primary login__btnFull">
+              Confirmar
+              </a>
+
 
               <div className="login__footer">
                 <a className="btn btn--ghost" href="/">Voltar</a>
