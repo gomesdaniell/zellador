@@ -611,3 +611,35 @@ button.sidebar__item:focus{
   color: inherit;
   outline: none;
 }
+
+.grid2{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:14px;
+}
+@media (max-width: 980px){
+  .grid2{ grid-template-columns: 1fr; }
+}
+
+.linkStrong{
+  color: inherit;
+  text-decoration: none;
+  font-weight: 700;
+}
+.linkStrong:hover{ text-decoration: underline; }
+
+.kv{ display:flex; flex-direction:column; gap:10px; }
+.kvRow{ display:flex; justify-content:space-between; gap:12px; }
+.kvKey{ color: rgba(255,255,255,.65); }
+.kvVal{ color: rgba(255,255,255,.95); }
+
+.checkList{ display:flex; flex-direction:column; gap:10px; }
+.checkItem{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.03);
+}
