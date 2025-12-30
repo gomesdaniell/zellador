@@ -135,6 +135,14 @@ export async function POST(req: Request) {
     return res;
   }
 
+   /* =========================
+   // 3) definir casa ativa do usuário
+   ========================= */
+   
+await supabase
+  .from("profiles")
+  .upsert({ id: auth.user.id, active_house_id: house.id }, { onConflict: "id" });
+
   /* =========================
      Response OK
   ========================= */
