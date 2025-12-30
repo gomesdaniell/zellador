@@ -58,6 +58,7 @@ export default function AppSidebar() {
     label: "Configurações",
     key: "config",
     children: [
+      { type: "link", label: "Configurações", href: "/terreiro", restrictedTo: ["viewer","admin", "owner"] },
       { type: "link", label: "Terreiro", href: "/terreiro", restrictedTo: ["viewer","admin","owner"] },
       { type: "link", label: "Criar APP", href: "/criar-app", restrictedTo: ["viewer","admin","owner"] },
       { type: "link", label: "Minha assinatura", href: "/minha-assinatura", restrictedTo: ["viewer","admin","owner"] },
@@ -71,7 +72,7 @@ export default function AppSidebar() {
  const [open, setOpen] = useState<Record<string, boolean>>({
   membros: false,
   giras: false,
-  config: true,
+  config: false,
 });
 
 
