@@ -5,7 +5,6 @@ import { nanoid } from "nanoid";
 export async function POST(req: Request) {
   const { house_id, role, days } = await req.json();
 
-  // 🔒 validações mínimas
   if (!house_id) {
     return NextResponse.json({ error: "house_id obrigatório" }, { status: 400 });
   }
@@ -33,8 +32,7 @@ export async function POST(req: Request) {
       house_id,
       role,
       expires_at,
-      used_at: null,        // 👈 EXPLÍCITO
-      status: "active",     // 👈 EXPLÍCITO (se a coluna existir)
+      used_at: null,
     })
     .select()
     .single();
