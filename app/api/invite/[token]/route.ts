@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 export async function GET(_req: Request, context: any) {
-  const token = context?.params?.token as string;
+  const token = context.params.token;
 
   const supabase = createClient(
     process.env.SUPABASE_URL!,
@@ -10,19 +10,20 @@ export async function GET(_req: Request, context: any) {
     { auth: { persistSession: false } }
   );
 
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("invites")
-    .select("id, token, house_id, role, expires_at, used_at")
+    .select("*")
     .eq("token", token)
+    .is("used_at", null)
     .maybeSingle();
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
   if (!data) {
-    return NextResponse.json({ error: "Convite não encontrado." }, { status: 404 });
+    return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
-  return NextResponse.json({ invite: data }, { status: 200 });
+  if (data.expires_at && new Date(data.expires_at) < new Date()) {
+    return NextResponse.json({ error: "expired" }, { status: 410 });
+  }
+
+  return NextResponse.json({ invite: data });
 }
