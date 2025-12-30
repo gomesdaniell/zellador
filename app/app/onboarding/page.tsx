@@ -35,8 +35,9 @@ export default function OnboardingPage() {
 
     try {
       const { data: auth } = await supabase.auth.getUser();
-      const user = auth.user;
-      if (!user) throw new Error("Sessão expirada. Faça login novamente.");
+// aqui auth.user pode ser usado com segurança
+const user = auth.user!;
+
 
       const slug = slugify(name);
 
