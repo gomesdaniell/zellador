@@ -119,4 +119,28 @@ export async function POST(req: Request) {
   }
 
   /* =========================
-     2
+     2) Vincular usuário
+  ========================= */
+  const { error: e2 } = await supabase.from("house_users").insert({
+    user_id: auth.user.id,
+    house_id: house.id,
+    role: "owner",
+  });
+
+  if (e2) {
+    const res = NextResponse.json({ error: e2.message }, { status: 400 });
+    cookiesToSet.forEach(({ name, value, options }) =>
+      res.cookies.set(name, value, options)
+    );
+    return res;
+  }
+
+  /* =========================
+     Response OK
+  ========================= */
+  const res = NextResponse.json({ ok: true, house_id: house.id });
+  cookiesToSet.forEach(({ name, value, options }) =>
+    res.cookies.set(name, value, options)
+  );
+  return res;
+}
