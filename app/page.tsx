@@ -25,7 +25,7 @@ export default function HomePage() {
             {/* BOTÃO LOGIN — INSERIDO */}
             <a className="btn btn--ghost" href="/login">Login</a>
 
-            <a className="btn btn--primary" href="/login?mode=signup">Experimente grátis</a>
+            <a className="btn btn--primary" href="/signup">Experimente grátis</a>
           </div>
 
         </div>
@@ -46,7 +46,7 @@ export default function HomePage() {
             </p>
 
            <div className="hero__actions">
-            <a className="btn btn--primary" href="/login?mode=signup">Experimente grátis por 30 dias</a>
+            <a className="btn btn--primary" href="/signup">Experimente grátis por 30 dias</a>
             <a className="btn btn--ghost" href="#recursos">Ver recursos</a>
           </div>
 
