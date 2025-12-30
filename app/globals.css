@@ -402,3 +402,31 @@ details p{ color: var(--muted); margin:10px 0 0; line-height:1.6; }
   transform: translateY(-50%);
   background: rgba(255,255,255,.35);
 }
+
+.page{ padding: 18px; }
+.pageHeader h1{ margin: 0; font-size: 22px; }
+.pageHeader p{ margin: 6px 0 0; opacity:.75; }
+
+.grid2{
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (max-width: 900px){
+  .grid2{ grid-template-columns: 1fr; }
+}
+
+.cardLink{
+  display:flex;
+  gap: 12px;
+  text-decoration:none;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  padding: 14px;
+  color: inherit;
+}
+.cardLink:hover{ background: rgba(255,255,255,.09); }
+.cardLink__icon{ font-size: 24px; }
+.muted{ opacity: .72; font-size: 13px; margin-top: 4px; }
