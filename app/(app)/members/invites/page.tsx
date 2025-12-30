@@ -3,7 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 
 type InviteRole = "medium" | "consulente";
-type InviteStatus = "active" | "used" | "disabled" | "expired";
+return list.filter((inv) =>
+  `${inv.token} ${inv.role}`.toLowerCase().includes(t)
+);
+
 
 type Invite = {
   id: string;
@@ -165,7 +168,14 @@ export default function MembersInvitesPage() {
             <tr key={inv.id}>
               <td>{inv.role === "medium" ? "Médium" : "Consulente"}</td>
               <td>{inv.token}</td>
-              <td>{inv.status}</td>
+              <td>
+  {inv.used_at
+    ? "Usado"
+    : inv.expires_at && new Date(inv.expires_at) < new Date()
+    ? "Expirado"
+    : "Ativo"}
+</td>
+
               <td>{inv.expires_at ? new Date(inv.expires_at).toLocaleDateString() : "—"}</td>
               <td style={{ display: "flex", gap: 8 }}>
                 <button onClick={() => copyLink(inv.token)}>Copiar</button>
