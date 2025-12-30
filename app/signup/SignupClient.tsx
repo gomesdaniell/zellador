@@ -13,7 +13,8 @@ export default function SignupClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const token = searchParams.get("token"); // 👈 VEM DO LINK
+  // ✅ AQUI É O PULO DO GATO: o parâmetro é "invite"
+  const inviteToken = searchParams.get("invite");
   const next = "/app/dashboard";
 
   const [fullName, setFullName] = useState("");
@@ -26,28 +27,30 @@ export default function SignupClient() {
 
   // 1️⃣ VALIDA CONVITE
   useEffect(() => {
-    if (!token) {
+    if (!inviteToken) {
       setMsg("Convite inválido.");
       return;
     }
 
-    fetch(`/api/invite/${token}`)
+    setMsg(null);
+    fetch(`/api/invite/${inviteToken}`)
       .then((r) => {
         if (!r.ok) throw new Error();
         return r.json();
       })
       .then((data) => setInvite(data))
       .catch(() => setMsg("Convite inválido ou expirado."));
-  }, [token]);
+  }, [inviteToken]);
 
   const canSubmit = useMemo(() => {
     return (
       fullName.trim().length >= 2 &&
       isValidEmail(email.trim()) &&
       password.length >= 6 &&
-      !!invite
+      !!invite &&
+      !!inviteToken
     );
-  }, [fullName, email, password, invite]);
+  }, [fullName, email, password, invite, inviteToken]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -64,9 +67,7 @@ export default function SignupClient() {
       const { error: signUpError } = await supabase.auth.signUp({
         email: emailNorm,
         password,
-        options: {
-          data: { full_name: fullNameNorm },
-        },
+        options: { data: { full_name: fullNameNorm } },
       });
       if (signUpError) throw signUpError;
 
@@ -81,7 +82,7 @@ export default function SignupClient() {
       const user = userData.user;
       if (!user) throw new Error("Usuário não autenticado.");
 
-      // 4️⃣ PROFILE
+      // 4️⃣ PROFILE (se existir)
       await supabase.from("profiles").upsert(
         {
           id: user.id,
@@ -90,18 +91,29 @@ export default function SignupClient() {
         { onConflict: "id" }
       );
 
-      // 5️⃣ VINCULA USUÁRIO À CASA
-      await supabase.from("house_members").insert({
-        user_id: user.id,
-        house_id: invite.house_id,
-        role: invite.role,
-      });
+      // 5️⃣ MEMBERSHIP (evita duplicar se já existir)
+      const { data: existing } = await supabase
+        .from("house_members")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("house_id", invite.house_id)
+        .maybeSingle();
 
-      // 6️⃣ MARCA CONVITE COMO USADO
+      if (!existing) {
+        const { error: memberErr } = await supabase.from("house_members").insert({
+          user_id: user.id,
+          house_id: invite.house_id,
+          role: invite.role,
+        });
+        if (memberErr) throw memberErr;
+      }
+
+      // 6️⃣ MARCA CONVITE COMO USADO (se ainda não foi)
       await supabase
         .from("invites")
         .update({ used_at: new Date().toISOString() })
-        .eq("id", invite.id);
+        .eq("id", invite.id)
+        .is("used_at", null);
 
       router.replace(next);
       router.refresh();
@@ -118,49 +130,58 @@ export default function SignupClient() {
   }
 
   return (
-    <main className="signup">
-      <div className="container signup__grid">
-        <aside className="signup__card">
-          <h2>Criar conta</h2>
+    <main style={{ padding: 40, maxWidth: 520 }}>
+      <h2 style={{ marginBottom: 6 }}>Criar conta</h2>
+      <p style={{ opacity: 0.8, marginTop: 0 }}>
+        Preencha seus dados para concluir o cadastro.
+      </p>
 
-          <form onSubmit={onSubmit} className="signup__form">
-            <label>
-              <span>Seu nome</span>
-              <input
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-              />
-            </label>
+      <form onSubmit={onSubmit} style={{ display: "grid", gap: 10, marginTop: 14 }}>
+        <label style={{ display: "grid", gap: 6 }}>
+          <span>Seu nome</span>
+          <input value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+        </label>
 
-            <label>
-              <span>E-mail</span>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </label>
+        <label style={{ display: "grid", gap: 6 }}>
+          <span>E-mail</span>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </label>
 
-            <label>
-              <span>Senha</span>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </label>
+        <label style={{ display: "grid", gap: 6 }}>
+          <span>Senha</span>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </label>
 
-            {msg && <div className="signup__msg">{msg}</div>}
+        {msg && (
+          <div style={{ padding: 10, borderRadius: 12, background: "rgba(255,255,255,.06)" }}>
+            {msg}
+          </div>
+        )}
 
-            <button className="btn btn--primary" disabled={!canSubmit || loading}>
-              {loading ? "Criando..." : "Concluir cadastro"}
-            </button>
-          </form>
-        </aside>
-      </div>
+        <button
+          disabled={!canSubmit || loading}
+          style={{
+            padding: 12,
+            borderRadius: 12,
+            fontWeight: 900,
+            border: "1px solid rgba(255,255,255,.15)",
+            background: "rgba(255,255,255,.10)",
+            cursor: "pointer",
+          }}
+        >
+          {loading ? "Criando..." : "Concluir cadastro"}
+        </button>
+      </form>
     </main>
   );
 }
