@@ -730,3 +730,88 @@ button.sidebar__item:focus{
 .login__link:hover{
   text-decoration: underline;
 }
+
+/* ===== SIGNUP (isolado) ===== */
+.signup{ padding: 64px 0 72px; }
+
+.signup__card{
+  width: min(920px, 100%);
+  margin: 0 auto;
+  border: 1px solid var(--border);
+  background: rgba(7,16,31,.55);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
+
+.signup__title{
+  margin: 0 0 6px;
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+.signup__sub{ margin: 0 0 14px; }
+
+.signup__form{ display: grid; gap: 14px; }
+
+.signup__section{
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.03);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.signup__sectionHead h2{
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+.signup__sectionHead p{ margin: 0 0 10px; }
+
+.signup__grid{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.signup__field{ display: grid; gap: 6px; }
+.signup__field--full{ grid-column: 1 / -1; }
+
+.signup__field label{
+  font-weight: 800;
+  font-size: 13px;
+  color: rgba(232,238,252,.92);
+}
+
+.signup__field input,
+.signup__field select{
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+  outline: none;
+}
+
+.signup__field input:focus,
+.signup__field select:focus{
+  border-color: rgba(255,255,255,.25);
+}
+
+.signup__actions{ margin-top: 4px; display: grid; gap: 10px; }
+.signup__btnFull{ width: 100%; }
+
+.signup__footer{
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.signup__micro{ text-align: center; margin: 0; }
+
+@media (max-width: 820px){
+  .signup__grid{ grid-template-columns: 1fr; }
+  .signup__footer{ flex-direction: column; align-items: stretch; }
+  .signup__footer .btn{ width: 100%; }
+}
