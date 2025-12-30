@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import type { RouteContext } from "next/server";
 
-export async function GET(req: Request, context: RouteContext) {
-  const token = (context.params?.token as string) ?? "";
+export async function GET(
+  req: Request,
+  { params }: { params: { token: string } }
+) {
+  const token = params.token;
 
   const supabase = createClient(
     process.env.SUPABASE_URL!,
@@ -18,15 +20,24 @@ export async function GET(req: Request, context: RouteContext) {
     .maybeSingle();
 
   if (error || !data) {
-    return NextResponse.json({ error: "Convite não encontrado" }, { status: 404 });
+    return NextResponse.json(
+      { error: "Convite não encontrado" },
+      { status: 404 }
+    );
   }
 
   if (data.used_at) {
-    return NextResponse.json({ error: "Convite já utilizado" }, { status: 410 });
+    return NextResponse.json(
+      { error: "Convite já utilizado" },
+      { status: 410 }
+    );
   }
 
   if (data.expires_at && new Date(data.expires_at) < new Date()) {
-    return NextResponse.json({ error: "Convite expirado" }, { status: 410 });
+    return NextResponse.json(
+      { error: "Convite expirado" },
+      { status: 410 }
+    );
   }
 
   return NextResponse.json({
