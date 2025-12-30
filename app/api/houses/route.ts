@@ -29,11 +29,11 @@ export async function POST(req: Request) {
   // 1) cria a casa
   const { data: house, error: e1 } = await supabase
     .from("houses")
-    .insert({
-      name,
-      slug: slugify(name),
-      created_by: auth.user.id,
-    })
+   .insert({
+  name,
+  slug: slugify(name),
+})
+
     .select("id")
     .single();
 
