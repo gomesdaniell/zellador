@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
-
 const MEMBERS_KEY = "zellador:members:v1";
 
 type ApprovedMember = {
@@ -38,15 +37,26 @@ function roleLabel(r: ApprovedMember["role"]) {
   return r === "medium" ? "Médium" : "Consulente";
 }
 
-export default function MembersPage() {
+export default function MembersPage({
+  forcedType,
+  title = "Membros",
+}: {
+  forcedType?: "medium" | "consulente";
+  title?: string;
+}) {
   const [list, setList] = useState<ApprovedMember[]>([]);
   const [q, setQ] = useState("");
-  const [type, setType] = useState<"all" | "medium" | "consulente">("all");
+  const [type, setType] = useState<"all" | "medium" | "consulente">(forcedType ?? "all");
   const [status, setStatus] = useState<"all" | "active" | "inactive">("all");
 
   useEffect(() => {
     setList(safeJson<ApprovedMember[]>(localStorage.getItem(MEMBERS_KEY), []));
   }, []);
+
+  // se trocar de rota (ex.: /members -> /members/mediuns), força o filtro certo
+  useEffect(() => {
+    if (forcedType) setType(forcedType);
+  }, [forcedType]);
 
   function persist(next: ApprovedMember[]) {
     setList(next);
@@ -88,15 +98,21 @@ export default function MembersPage() {
     <div className="page">
       <div className="listTop" style={{ alignItems: "flex-start" }}>
         <div>
-          <h1 className="listTitle" style={{ fontSize: 44 }}>Membros</h1>
+          <h1 className="listTitle" style={{ fontSize: 44 }}>
+            {title}
+          </h1>
           <div className="muted" style={{ marginTop: 6 }}>
             Lista de cadastros aprovados. Você pode ativar/desativar e acessar o detalhe.
           </div>
         </div>
 
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <Link className="btnGhost" href="/members/pending">Pendentes</Link>
-          <Link className="btnGhost" href="/members/invites">Convites</Link>
+          <Link className="btnGhost" href="/members/pending">
+            Pendentes
+          </Link>
+          <Link className="btnGhost" href="/members/invites">
+            Convites
+          </Link>
           <span className="badge badgeSoft">MVP</span>
         </div>
       </div>
@@ -104,22 +120,21 @@ export default function MembersPage() {
       <div className="panel" style={{ marginTop: 14 }}>
         <div className="panelBody" style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "center" }}>
           <div className="searchBox" style={{ minWidth: 320, flex: 1 }}>
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Buscar por nome, WhatsApp, email…"
-            />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por nome, WhatsApp, email…" />
             <span className="searchIcon">🔍</span>
           </div>
 
-          <div className="field" style={{ minWidth: 200 }}>
-            <label>Tipo</label>
-            <select value={type} onChange={(e) => setType(e.target.value as any)}>
-              <option value="all">Todos</option>
-              <option value="medium">Médiuns</option>
-              <option value="consulente">Consulentes</option>
-            </select>
-          </div>
+          {/* Se for uma página filtrada (ex.: /members/mediuns), não mostra o select de tipo */}
+          {!forcedType && (
+            <div className="field" style={{ minWidth: 200 }}>
+              <label>Tipo</label>
+              <select value={type} onChange={(e) => setType(e.target.value as any)}>
+                <option value="all">Todos</option>
+                <option value="medium">Médiuns</option>
+                <option value="consulente">Consulentes</option>
+              </select>
+            </div>
+          )}
 
           <div className="field" style={{ minWidth: 200 }}>
             <label>Status</label>
@@ -150,7 +165,11 @@ export default function MembersPage() {
           <div className="emptyIcon">👥</div>
           <div className="emptyTitle">Nenhum membro encontrado</div>
           <div className="emptyText">
-            Ajuste os filtros ou aprove alguém em <Link href="/members/pending" className="linkStrong">Pendentes</Link>.
+            Ajuste os filtros ou aprove alguém em{" "}
+            <Link href="/members/pending" className="linkStrong">
+              Pendentes
+            </Link>
+            .
           </div>
         </div>
       ) : (
@@ -179,13 +198,13 @@ export default function MembersPage() {
                   <td>{m.whatsapp}</td>
                   <td>{m.email || "—"}</td>
                   <td>
-                    <span className={`pill ${m.active ? "pillOk" : "pillMuted"}`}>
-                      {m.active ? "Ativo" : "Inativo"}
-                    </span>
+                    <span className={`pill ${m.active ? "pillOk" : "pillMuted"}`}>{m.active ? "Ativo" : "Inativo"}</span>
                   </td>
                   <td>{new Date(m.approvedAt).toLocaleDateString("pt-BR")}</td>
                   <td style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                    <Link className="btnGhost" href={`/members/${m.id}`}>Ver</Link>
+                    <Link className="btnGhost" href={`/members/${m.id}`}>
+                      Ver
+                    </Link>
                     <button className="btnGhost" onClick={() => toggleActive(m.id)}>
                       {m.active ? "Desativar" : "Ativar"}
                     </button>
