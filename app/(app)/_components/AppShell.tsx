@@ -12,6 +12,8 @@ const items: Item[] = [
   { label: "Membros", href: "/members", icon: "👥", group: "Rotina" },
   { label: "Médiuns", href: "/members/mediuns", icon: "🧑‍🦳", group: "Rotina" },
   { label: "Consulentes", href: "/members/consulentes", icon: "🪪", group: "Rotina" },
+  { label: "Convites", href: "/members/invites", icon: "🔗", group: "Rotina" },
+
 
   { label: "Giras", href: "/giras", icon: "🕯️", group: "Rotina" },
   { label: "Camarinha", href: "/camarinha", icon: "🎽", group: "Rotina" },
