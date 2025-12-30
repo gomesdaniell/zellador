@@ -1,379 +1,243 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
+import { supabaseBrowser } from "@/app/_lib/supabaseBrowser";
 
 type Invite = {
   id: string;
   token: string;
+  house_id: string;
   role: "medium" | "consulente";
-  status: "active" | "used" | "expired" | "disabled";
-  expiresAt?: string | null;
+  expires_at: string | null;
+  used_at: string | null;
 };
 
-type NormalizedSettings = {
-  versionId: string;
-
-  rulesRequired: boolean;
-  rulesText: string;
-
-  lgpdRequired: boolean; // fixo true no MVP, mas deixo aqui
-  lgpdText: string;
-  lgpdMarketingOptInEnabled: boolean;
-
-  contractEnabled: boolean;
-  contractRequired: boolean;
-  contractText: string;
-};
-
-const INVITES_KEY = "zellador:invites:v1";
-const SETTINGS_KEY = "zellador:onboarding_settings:v1";
-const PENDING_KEY = "zellador:pending_members:v1";
-
-function safeJson<T>(raw: string | null, fallback: T): T {
-  try {
-    if (!raw) return fallback;
-    return JSON.parse(raw) as T;
-  } catch {
-    return fallback;
-  }
-}
-
-// tenta extrair texto/flags independente do formato salvo
-function normalizeSettings(raw: any): NormalizedSettings {
-  const defaults: NormalizedSettings = {
-    versionId: "v_default",
-
-    rulesRequired: true,
-    rulesText:
-      "REGRAS DA CASA\n\n(1) Respeito e convivência.\n(2) Compromissos e pontualidade.\n(3) Sigilo.\n(4) Uso de imagem conforme consentimento.",
-
-    lgpdRequired: true,
-    lgpdText:
-      "TERMO DE CIÊNCIA E CONSENTIMENTO (LGPD)\n\nUtilizamos seus dados para gestão e comunicação interna. Você pode solicitar atualização ou exclusão conforme aplicável.",
-    lgpdMarketingOptInEnabled: false,
-
-    contractEnabled: false,
-    contractRequired: false,
-    contractText: "",
-  };
-
-  if (!raw || typeof raw !== "object") return defaults;
-
-  // suporta formato "flat" (rulesText, lgpdText etc)
-  const flatRulesText = raw.rulesText ?? raw.rules_text ?? raw.rules;
-  const flatLgpdText = raw.lgpdText ?? raw.lgpd_text ?? raw.lgpd;
-  const flatContractText = raw.contractText ?? raw.contract_text ?? raw.contract;
-
-  // suporta formato "nested" (rules.text, lgpd.text, contract.text)
-  const nestedRulesText = raw.rules?.text ?? raw.rules?.content ?? raw.rules?.value;
-  const nestedLgpdText = raw.lgpd?.text ?? raw.lgpd?.content ?? raw.lgpd?.value;
-  const nestedContractText = raw.contract?.text ?? raw.contract?.content ?? raw.contract?.value;
-
-  const rulesText = String(nestedRulesText ?? flatRulesText ?? defaults.rulesText ?? "");
-  const lgpdText = String(nestedLgpdText ?? flatLgpdText ?? defaults.lgpdText ?? "");
-  const contractText = String(nestedContractText ?? flatContractText ?? defaults.contractText ?? "");
-
-  // flags (flat e nested)
-  const rulesRequired =
-    Boolean(raw.rulesRequired ?? raw.rules_required ?? raw.rules?.required ?? raw.rules?.isRequired ?? defaults.rulesRequired);
-
-  const lgpdMarketingOptInEnabled =
-    Boolean(raw.lgpdMarketingOptInEnabled ?? raw.lgpd_marketing_optin ?? raw.lgpd?.marketingOptInEnabled ?? raw.lgpd?.optInEnabled ?? false);
-
-  const contractEnabled =
-    Boolean(raw.contractEnabled ?? raw.contract_enabled ?? raw.contract?.enabled ?? raw.contract?.isEnabled ?? false);
-
-  const contractRequired =
-    Boolean(raw.contractRequired ?? raw.contract_required ?? raw.contract?.required ?? raw.contract?.isRequired ?? false);
-
-  const versionId = String(raw.versionId ?? raw.version ?? raw.version_id ?? defaults.versionId);
-
-  return {
-    versionId,
-    rulesRequired,
-    rulesText: rulesText.trim() || defaults.rulesText,
-    lgpdRequired: true,
-    lgpdText: lgpdText.trim() || defaults.lgpdText,
-    lgpdMarketingOptInEnabled,
-    contractEnabled,
-    contractRequired,
-    contractText,
-  };
-}
-
-function isInviteExpired(inv: Invite) {
-  if (!inv.expiresAt) return false;
-  return new Date(inv.expiresAt).getTime() < Date.now();
-}
-
-function roleLabel(r: Invite["role"]) {
-  return r === "medium" ? "Médium" : "Consulente";
-}
-
-export default function OnboardingWizard() {
+export default function OnboardingTokenPage() {
+  const router = useRouter();
   const params = useParams<{ token: string }>();
-  const token = params?.token;
+  const token = String(params.token || "");
 
-  const [step, setStep] = useState(1);
-
+  const sb = useMemo(() => supabaseBrowser(), []);
+  const [loading, setLoading] = useState(true);
   const [invite, setInvite] = useState<Invite | null>(null);
-  const [settings, setSettings] = useState<NormalizedSettings | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
 
   // form
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const [acceptRules, setAcceptRules] = useState(false);
   const [acceptLgpd, setAcceptLgpd] = useState(false);
-  const [acceptMarketing, setAcceptMarketing] = useState(false);
-  const [acceptContract, setAcceptContract] = useState(false);
 
   useEffect(() => {
-    try {
-      const invites = safeJson<Invite[]>(localStorage.getItem(INVITES_KEY), []);
-      const found = invites.find((i) => i.token === token);
+    (async () => {
+      setLoading(true);
+      setErr(null);
 
-      if (!found) {
-        setError("Convite não encontrado.");
+      const { data, error } = await sb
+        .from("invites")
+        .select("id, token, house_id, role, expires_at, used_at")
+        .eq("token", token)
+        .maybeSingle();
+
+      if (error) {
+        setErr("Erro ao validar convite.");
+        setInvite(null);
+        setLoading(false);
         return;
       }
-      if (found.status !== "active") {
-        setError("Convite inválido, expirado ou já utilizado.");
+
+      if (!data) {
+        setErr("Convite não encontrado.");
+        setInvite(null);
+        setLoading(false);
         return;
       }
-      if (isInviteExpired(found)) {
-        setError("Convite expirado.");
+
+      // valida expiração e uso
+      const used = !!data.used_at;
+      const expired = data.expires_at ? new Date(data.expires_at).getTime() < Date.now() : false;
+
+      if (used) {
+        setErr("Este convite já foi utilizado.");
+        setInvite(null);
+        setLoading(false);
+        return;
+      }
+      if (expired) {
+        setErr("Este convite expirou.");
+        setInvite(null);
+        setLoading(false);
         return;
       }
 
-      setInvite(found);
+      setInvite(data as Invite);
+      setLoading(false);
+    })();
+  }, [sb, token]);
 
-      const rawSettings = safeJson<any>(localStorage.getItem(SETTINGS_KEY), null);
-      setSettings(normalizeSettings(rawSettings));
-    } catch {
-      setError("Erro ao carregar convite/configurações.");
-    }
-  }, [token]);
+  async function handleSubmit() {
+    if (!invite) return;
+    setErr(null);
 
-  const canGoStep2 = useMemo(() => true, []);
-  const canGoStep3 = useMemo(() => name.trim().length > 2 && whatsapp.trim().length >= 8, [name, whatsapp]);
+    if (!name.trim()) return setErr("Informe seu nome.");
+    if (!email.trim()) return setErr("Informe seu e-mail.");
+    if (password.length < 6) return setErr("A senha deve ter pelo menos 6 caracteres.");
+    if (!acceptRules) return setErr("Você precisa aceitar as regras da casa.");
+    if (!acceptLgpd) return setErr("Você precisa concordar com o uso dos dados (LGPD).");
 
-  const canSubmit = useMemo(() => {
-    if (!settings) return false;
-    if (settings.rulesRequired && !acceptRules) return false;
-    if (!acceptLgpd) return false;
-    if (settings.contractEnabled && settings.contractRequired && !acceptContract) return false;
-    return true;
-  }, [settings, acceptRules, acceptLgpd, acceptContract]);
+    setLoading(true);
 
-  function next() {
-    setStep((s) => Math.min(4, s + 1));
-  }
-  function back() {
-    setStep((s) => Math.max(1, s - 1));
-  }
-
-  function submit() {
-    if (!invite || !settings) return;
-
-    const pending = {
-      id: typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `pend_${Date.now()}_${Math.random().toString(16).slice(2)}`,
-      token,
-      role: invite.role,
-      name: name.trim(),
-      whatsapp: whatsapp.trim(),
-      email: email.trim() || "",
-      consents: {
-        rules: acceptRules,
-        lgpd: acceptLgpd,
-        marketing: settings.lgpdMarketingOptInEnabled ? acceptMarketing : false,
-        contract: settings.contractEnabled ? acceptContract : false,
+    // 1) cria conta
+    const { data: signUpData, error: signUpErr } = await sb.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: name,
+        },
       },
-      settingsVersion: settings.versionId,
-      createdAt: new Date().toISOString(),
-      status: "pending",
-    };
+    });
 
-    const pendings = safeJson<any[]>(localStorage.getItem(PENDING_KEY), []);
-    localStorage.setItem(PENDING_KEY, JSON.stringify([pending, ...pendings]));
+    if (signUpErr || !signUpData.user) {
+      setErr(signUpErr?.message || "Falha ao criar usuário.");
+      setLoading(false);
+      return;
+    }
 
-    // marca convite como usado
-    const invites = safeJson<Invite[]>(localStorage.getItem(INVITES_KEY), []);
-    const updated = invites.map((i) => (i.token === token ? { ...i, status: "used" as const } : i));
-    localStorage.setItem(INVITES_KEY, JSON.stringify(updated));
+    const userId = signUpData.user.id;
 
-    next();
+    // 2) garante perfil (muitos projetos já criam por trigger)
+    // Vamos fazer UPSERT para não depender de trigger.
+    const { error: profErr } = await sb.from("profiles").upsert(
+      {
+        id: userId,
+        active_house_id: invite.house_id,
+        access_level: "USER",
+      },
+      { onConflict: "id" }
+    );
+
+    if (profErr) {
+      setErr("Usuário criado, mas falhou ao configurar perfil.");
+      setLoading(false);
+      return;
+    }
+
+    // 3) cria member
+    const { error: memErr } = await sb.from("members").insert({
+      house_id: invite.house_id,
+      user_id: userId,
+      role: invite.role,
+      name,
+      whatsapp,
+      email,
+      active: true,
+      consents: {
+        rules: true,
+        lgpd: true,
+        created_from: "invite",
+        invite_id: invite.id,
+      },
+    });
+
+    if (memErr) {
+      setErr("Perfil criado, mas falhou ao salvar cadastro.");
+      setLoading(false);
+      return;
+    }
+
+    // 4) marca convite como usado
+    const { error: invErr } = await sb
+      .from("invites")
+      .update({ used_at: new Date().toISOString() })
+      .eq("id", invite.id);
+
+    if (invErr) {
+      // não bloqueia o usuário por isso no MVP
+      console.warn("Falha ao marcar convite como usado:", invErr);
+    }
+
+    // 5) entra (se email confirmation estiver OFF, a sessão já existe)
+    // se por algum motivo não logar, forçamos o login:
+    const { data: sessionNow } = await sb.auth.getSession();
+    if (!sessionNow.session) {
+      await sb.auth.signInWithPassword({ email, password });
+    }
+
+    setLoading(false);
+    router.replace("/dashboard");
   }
 
-  if (error) {
+  if (loading) {
     return (
-      <div className="page" style={{ maxWidth: 760, margin: "0 auto" }}>
-        <h1>Convite inválido</h1>
-        <p className="muted">{error}</p>
+      <div className="card">
+        <h1>Cadastro no Terreiro</h1>
+        <p>Carregando convite...</p>
       </div>
     );
   }
 
-  if (!invite || !settings) {
+  if (err) {
     return (
-      <div className="page" style={{ maxWidth: 760, margin: "0 auto" }}>
-        Carregando…
+      <div className="card">
+        <h1>Cadastro no Terreiro</h1>
+        <p style={{ opacity: 0.9 }}>{err}</p>
       </div>
     );
   }
 
   return (
-    <div className="page" style={{ maxWidth: 860, margin: "0 auto" }}>
-      <h1 style={{ fontSize: 54, marginBottom: 10 }}>Cadastro no Terreiro</h1>
-      <div className="muted" style={{ marginBottom: 18 }}>
-        Tipo: <strong>{roleLabel(invite.role)}</strong> • Termos: <strong>{settings.versionId}</strong>
+    <div className="card" style={{ maxWidth: 720, margin: "40px auto" }}>
+      <h1 style={{ fontSize: 44, marginBottom: 6 }}>Cadastro no Terreiro</h1>
+      <p style={{ opacity: 0.85, marginBottom: 20 }}>
+        Você está se cadastrando como <b>{invite?.role === "medium" ? "Médium" : "Consulente"}</b>.
+      </p>
+
+      <div className="grid2">
+        <label>
+          Nome
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Seu nome" />
+        </label>
+
+        <label>
+          WhatsApp (opcional)
+          <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="(92) 9xxxx-xxxx" />
+        </label>
+
+        <label>
+          E-mail (login)
+          <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@exemplo.com" />
+        </label>
+
+        <label>
+          Senha
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="mínimo 6" />
+        </label>
       </div>
 
-      {/* STEP 1 */}
-      {step === 1 && (
-        <div className="panel">
-          <div className="panelBody">
-            <h2 style={{ margin: 0 }}>Bem-vindo(a)</h2>
-            <div className="muted">
-              Você recebeu um convite para se cadastrar. Leva poucos minutos.
-            </div>
+      <div style={{ marginTop: 18 }}>
+        <label style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 10 }}>
+          <input type="checkbox" checked={acceptRules} onChange={(e) => setAcceptRules(e.target.checked)} />
+          Li e concordo com as regras da casa
+        </label>
 
-            <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
-              <button className="btnPrimary" onClick={next} disabled={!canGoStep2}>
-                Iniciar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+        <label style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          <input type="checkbox" checked={acceptLgpd} onChange={(e) => setAcceptLgpd(e.target.checked)} />
+          Concordo com o uso dos dados (LGPD)
+        </label>
+      </div>
 
-      {/* STEP 2 */}
-      {step === 2 && (
-        <div className="panel">
-          <div className="panelBody">
-            <h2 style={{ margin: 0 }}>Dados básicos</h2>
+      {err && <p style={{ marginTop: 14 }}>{err}</p>}
 
-            <div className="field">
-              <label>Nome completo</label>
-              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Seu nome" />
-            </div>
-
-            <div className="field">
-              <label>WhatsApp</label>
-              <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="(DDD) número" />
-            </div>
-
-            <div className="field">
-              <label>Email (opcional)</label>
-              <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seuemail@..." />
-            </div>
-
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <button className="btnGhost" onClick={back}>
-                Voltar
-              </button>
-              <button className="btnPrimary" onClick={next} disabled={!canGoStep3}>
-                Continuar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* STEP 3 */}
-      {step === 3 && (
-        <div className="panel">
-          <div className="panelBody">
-            <h2 style={{ margin: 0 }}>Termos e aceites</h2>
-
-            {/* REGRAS */}
-            <div className="panel" style={{ background: "rgba(255,255,255,.03)" }}>
-              <div className="panelBody">
-                <strong>Regras da casa</strong>
-                <div className="previewBox" style={{ marginTop: 10 }}>
-                  {settings.rulesText}
-                </div>
-
-                <label className="checkRow" style={{ marginTop: 10 }}>
-                  <input type="checkbox" checked={acceptRules} onChange={(e) => setAcceptRules(e.target.checked)} />
-                  Li e concordo
-                </label>
-              </div>
-            </div>
-
-            {/* LGPD */}
-            <div className="panel" style={{ background: "rgba(255,255,255,.03)" }}>
-              <div className="panelBody">
-                <strong>LGPD</strong>
-                <div className="previewBox" style={{ marginTop: 10 }}>
-                  {settings.lgpdText}
-                </div>
-
-                <label className="checkRow" style={{ marginTop: 10 }}>
-                  <input type="checkbox" checked={acceptLgpd} onChange={(e) => setAcceptLgpd(e.target.checked)} />
-                  Concordo com o uso dos dados
-                </label>
-
-                {settings.lgpdMarketingOptInEnabled && (
-                  <label className="checkRow">
-                    <input
-                      type="checkbox"
-                      checked={acceptMarketing}
-                      onChange={(e) => setAcceptMarketing(e.target.checked)}
-                    />
-                    Quero receber comunicados
-                  </label>
-                )}
-              </div>
-            </div>
-
-            {/* CONTRATO (opcional) */}
-            {settings.contractEnabled && (
-              <div className="panel" style={{ background: "rgba(255,255,255,.03)" }}>
-                <div className="panelBody">
-                  <strong>Contrato</strong>
-                  <div className="previewBox" style={{ marginTop: 10 }}>
-                    {settings.contractText || "Contrato não configurado."}
-                  </div>
-
-                  <label className="checkRow" style={{ marginTop: 10 }}>
-                    <input
-                      type="checkbox"
-                      checked={acceptContract}
-                      onChange={(e) => setAcceptContract(e.target.checked)}
-                    />
-                    Aceito o contrato
-                  </label>
-                </div>
-              </div>
-            )}
-
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <button className="btnGhost" onClick={back}>
-                Voltar
-              </button>
-              <button className="btnPrimary" onClick={submit} disabled={!canSubmit}>
-                Enviar para aprovação
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* STEP 4 */}
-      {step === 4 && (
-        <div className="panel">
-          <div className="panelBody">
-            <h2 style={{ margin: 0 }}>Cadastro enviado!</h2>
-            <div className="muted">
-              Seu cadastro foi enviado para aprovação da administração. Você receberá retorno em breve.
-            </div>
-          </div>
-        </div>
-      )}
+      <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
+        <button className="btn" onClick={handleSubmit} disabled={loading}>
+          Criar conta e entrar
+        </button>
+      </div>
     </div>
   );
 }
