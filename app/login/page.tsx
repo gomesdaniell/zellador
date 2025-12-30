@@ -27,39 +27,37 @@ export default function LoginPage() {
         </div>
       </header>
 
-      {/* Login body */}
-      <section className="auth">
+      {/* Login body (novo bloco com padrão visual) */}
+      <section className="login">
         <div className="container">
-          <div className="auth__card">
-            <h1>Entrar</h1>
-            <p className="muted">Acesse sua conta para continuar.</p>
+          <div className="login__card">
+            <h1 className="login__title">Entrar</h1>
+            <p className="login__sub muted">Acesse sua conta para continuar.</p>
 
-            <form className="auth__form">
-              <div className="field">
+            <form className="login__form">
+              <div className="login__field">
                 <label htmlFor="email">Email</label>
                 <input id="email" type="email" placeholder="seu@email.com" />
               </div>
 
-              <div className="field">
+              <div className="login__field">
                 <label htmlFor="senha">Senha</label>
                 <input id="senha" type="password" placeholder="••••••••" />
               </div>
 
-              <div className="auth__links">
+              <div className="login__links">
                 <a href="/esqueci-senha">Esqueci minha senha</a>
               </div>
 
-              <button type="submit" className="btn btn--primary btn--block">
+              <button type="submit" className="btn btn--primary login__btnFull">
                 Confirmar
               </button>
 
-              <div className="auth__footer">
-                <a className="btn btn--ghost" href="/">
-                  Voltar
-                </a>
+              <div className="login__footer">
+                <a className="btn btn--ghost" href="/">Voltar</a>
 
                 <p className="muted">
-                  Ainda não tem cadastro? <a href="/login?mode=signup">Criar conta</a>
+                  Ainda não tem cadastro? <a className="login__link" href="/login?mode=signup">Criar conta</a>
                 </p>
               </div>
             </form>
