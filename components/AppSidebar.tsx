@@ -29,18 +29,7 @@ export default function AppSidebar() {
         ],
       },
 
-      {
-        type: "group",
-        label: "Giras",
-        key: "giras",
-        children: [
-          { type: "link", label: "Atendimento", href: "/giras/atendimento" },
-          { type: "link", label: "Treinamento", href: "/giras/treinamento" },
-          { type: "link", label: "Festiva", href: "/giras/festiva" },
-          { type: "link", label: "Corrente", href: "/giras/corrente" },
-        ],
-      },
-
+      { type: "link", label: "Giras", href: "/giras" },
       { type: "link", label: "Camarinha", href: "/camarinha" },
       { type: "link", label: "Eventos", href: "/eventos" },
       { type: "link", label: "Arrecadação", href: "/arrecadacao" },
