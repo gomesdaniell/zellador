@@ -93,14 +93,14 @@ export default function SignupClient() {
 
       // 5️⃣ MEMBERSHIP (evita duplicar se já existir)
       const { data: existing } = await supabase
-        .from("house_members")
+        .from("house_users")
         .select("id")
         .eq("user_id", user.id)
         .eq("house_id", invite.house_id)
         .maybeSingle();
 
       if (!existing) {
-        const { error: memberErr } = await supabase.from("house_members").insert({
+        const { error: memberErr } = await supabase.from("house_users").insert({
           user_id: user.id,
           house_id: invite.house_id,
           role: invite.role,
