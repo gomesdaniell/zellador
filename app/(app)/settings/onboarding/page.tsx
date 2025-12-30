@@ -149,7 +149,33 @@ export default function SettingsOnboardingPage() {
     setSettings(reset);
     setSavedToast("Padrões restaurados!");
     window.setTimeout(() => setSavedToast(null), 2200);
+  };
+
+  async function gerarConvite(role: "medium" | "consulente") {
+  try {
+    const res = await fetch("/api/invites/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        house_id: activeHouseId, // 👈 já existente no seu contexto
+        role,
+      }),
+    });
+
+    const json = await res.json();
+
+    if (!res.ok) {
+      alert(json.error || "Erro ao gerar convite");
+      return;
+    }
+
+    await navigator.clipboard.writeText(json.link);
+    alert("Convite gerado e link copiado!");
+  } catch (e) {
+    alert("Falha ao gerar convite");
   }
+}
+
 
   return (
     <div className="page">
