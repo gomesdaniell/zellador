@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-export async function POST(req: Request, { params }: { params: { token: string } }) {
+export async function POST(req: Request, context: any) {
+  const token = context?.params?.token as string;
+
   const body = await req.json().catch(() => ({}));
   const { name, whatsapp, email, password, acceptRules, acceptLgpd } = body ?? {};
 
@@ -22,7 +24,7 @@ export async function POST(req: Request, { params }: { params: { token: string }
   const { data: invite, error: invErr } = await supabase
     .from("invites")
     .select("id, token, house_id, role, expires_at, used_at")
-    .eq("token", params.token)
+    .eq("token", token)
     .maybeSingle();
 
   if (invErr) return NextResponse.json({ error: invErr.message }, { status: 500 });
@@ -31,7 +33,7 @@ export async function POST(req: Request, { params }: { params: { token: string }
   if (invite.expires_at && new Date(invite.expires_at).getTime() < Date.now())
     return NextResponse.json({ error: "Este convite expirou." }, { status: 410 });
 
-  // 2) cria usuário via Admin (bypass de RLS e sem depender de trigger)
+  // 2) cria usuário
   const { data: created, error: createUserErr } = await supabase.auth.admin.createUser({
     email,
     password,
@@ -79,3 +81,4 @@ export async function POST(req: Request, { params }: { params: { token: string }
 
   return NextResponse.json({ ok: true }, { status: 200 });
 }
+
