@@ -7,22 +7,22 @@ import { useEffect, useState } from "react";
 type Item = { label: string; href: string; icon: string; group?: string };
 
 const items: Item[] = [
-  { label: "Dashboard", href: "/app/dashboard", icon: "🏠" },
+  { label: "Dashboard", href: "/dashboard", icon: "🏠" },
 
-  { label: "Membros", href: "/app/members", icon: "👥", group: "Rotina" },
-  { label: "Giras", href: "/app/giras", icon: "🕯️", group: "Rotina" },
-  { label: "Camarinha", href: "/app/camarinha", icon: "🎽", group: "Rotina" },
-  { label: "Eventos", href: "/app/events", icon: "📅", group: "Rotina" },
-  { label: "Arrecadação", href: "/app/arrecadacao", icon: "🧺", group: "Rotina" },
-  { label: "Pontos", href: "/app/pontos", icon: "🎵", group: "Rotina" },
-  { label: "Agenda", href: "/app/agenda", icon: "🗓️", group: "Rotina" },
-  { label: "Comunicados", href: "/app/comunicados", icon: "📣", group: "Rotina" },
-  { label: "Pedido de reza", href: "/app/pedidos", icon: "🙏", group: "Rotina" },
+  { label: "Membros", href: "/members", icon: "👥", group: "Rotina" },
+  { label: "Giras", href: "/giras", icon: "🕯️", group: "Rotina" },
+  { label: "Camarinha", href: "/camarinha", icon: "🎽", group: "Rotina" },
+  { label: "Eventos", href: "/events", icon: "📅", group: "Rotina" },
+  { label: "Arrecadação", href: "/arrecadacao", icon: "🧺", group: "Rotina" },
+  { label: "Pontos", href: "/pontos", icon: "🎵", group: "Rotina" },
+  { label: "Agenda", href: "/agenda", icon: "🗓️", group: "Rotina" },
+  { label: "Comunicados", href: "/comunicados", icon: "📣", group: "Rotina" },
+  { label: "Pedido de reza", href: "/pedidos", icon: "🙏", group: "Rotina" },
 
-  { label: "Financeiro", href: "/app/financeiro", icon: "📊", group: "Gestão" },
-  { label: "Estoque", href: "/app/estoque", icon: "📦", group: "Gestão" },
+  { label: "Financeiro", href: "/financeiro", icon: "📊", group: "Gestão" },
+  { label: "Estoque", href: "/estoque", icon: "📦", group: "Gestão" },
 
-  { label: "Configurações", href: "/app/settings", icon: "⚙️", group: "Sistema" },
+  { label: "Configurações", href: "/settings", icon: "⚙️", group: "Sistema" },
 ];
 
 function groupItems(list: Item[]) {
