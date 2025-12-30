@@ -643,3 +643,90 @@ button.sidebar__item:focus{
   border:1px solid rgba(255,255,255,.08);
   background: rgba(255,255,255,.03);
 }
+
+/* ===== LOGIN (isolado, não interfere na landing) ===== */
+.login{
+  padding: 64px 0 72px;
+}
+
+.login__card{
+  width: min(520px, 100%);
+  margin: 0 auto;
+  border: 1px solid var(--border);
+  background: rgba(7,16,31,.55);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
+
+.login__title{
+  margin: 0 0 6px;
+  font-size: 28px;      /* evita o H1 gigante da landing */
+  line-height: 1.2;
+}
+
+.login__sub{
+  margin: 0 0 14px;
+}
+
+.login__form{
+  display: grid;
+  gap: 12px;
+}
+
+.login__field{
+  display: grid;
+  gap: 6px;
+}
+
+.login__field label{
+  font-weight: 800;
+  font-size: 13px;
+  color: rgba(232,238,252,.92);
+}
+
+.login__field input{
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+  outline: none;
+}
+
+.login__field input:focus{
+  border-color: rgba(255,255,255,.25);
+}
+
+.login__links{
+  display:flex;
+  justify-content:flex-end;
+  font-size: 13px;
+}
+
+.login__links a{
+  opacity: .85;
+}
+.login__links a:hover{
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.login__btnFull{
+  width: 100%;
+}
+
+.login__footer{
+  margin-top: 8px;
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+}
+
+.login__link{
+  font-weight: 800;
+}
+.login__link:hover{
+  text-decoration: underline;
+}
