@@ -59,9 +59,9 @@ export default function AppSidebar() {
     key: "config",
     children: [
       { type: "link", label: "Configurações", href: "/configuracoes", restrictedTo: ["admin", "owner"] },
-      { type: "link", label: "Terreiro", href: "/terreiro", restrictedTo: ["owner"] },
-      { type: "link", label: "Criar APP", href: "/criar-app", restrictedTo: ["owner"] },
-      { type: "link", label: "Minha assinatura", href: "/minha-assinatura", restrictedTo: ["owner"] },
+      { type: "link", label: "Terreiro", href: "/terreiro", restrictedTo: ["admin","owner"] },
+      { type: "link", label: "Criar APP", href: "/criar-app", restrictedTo: ["admin","owner"] },
+      { type: "link", label: "Minha assinatura", href: "/minha-assinatura", restrictedTo: ["admin","owner"] },
     ],
   },
 
