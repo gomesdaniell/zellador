@@ -1037,3 +1037,271 @@ button.sidebar__item:focus{
   .appSidebar{ width: 100%; }
   .appMain{ padding: 12px; }
 }
+
+/* ===== CONFIG > TERREIRO (isolado) ===== */
+.tercfg{ display:flex; flex-direction:column; gap:14px; }
+
+.tercfg__head{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+}
+
+.tercfg__actions{ display:flex; gap:10px; align-items:center; }
+
+.tercfg__grid{
+  display:grid;
+  grid-template-columns: 320px 1fr;
+  gap:14px;
+}
+
+.tercfg__side{ display:flex; flex-direction:column; gap:12px; }
+
+.tercfg__logoCard{
+  border:1px solid var(--border);
+  border-radius:18px;
+  background: rgba(255,255,255,.03);
+  padding:12px;
+  box-shadow: var(--shadow);
+}
+
+.tercfg__logoHead{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+.tercfg__sideTitle{ font-weight:900; font-size:14px; }
+
+.tercfg__pill{
+  font-size:11px;
+  padding:4px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  color: var(--muted);
+}
+
+.tercfg__logoBox{
+  margin-top:10px;
+  border:1px dashed rgba(255,255,255,.18);
+  border-radius:14px;
+  height:180px;
+  display:grid;
+  place-items:center;
+  background: rgba(255,255,255,.02);
+}
+
+.tercfg__logoPlaceholder{
+  color: var(--muted);
+  font-weight:800;
+  font-size:13px;
+}
+
+.tercfg__mini{ margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,.08); }
+.tercfg__miniLabel{ font-weight:900; font-size:12px; color: rgba(232,238,252,.92); }
+.tercfg__miniRow{ display:flex; justify-content:space-between; margin-top:6px; }
+.tercfg__miniLevel{ color: var(--muted); font-size:12px; }
+.tercfg__miniName{ font-weight:900; font-size:12px; }
+
+.tercfg__sideInfo{
+  border:1px solid var(--border);
+  border-radius:18px;
+  background: rgba(255,255,255,.02);
+  padding:12px;
+}
+.tercfg__sideInfoText{ margin-top:6px; line-height:1.5; color: rgba(232,238,252,.92); font-size:13px; }
+
+.tercfg__main{
+  border:1px solid var(--border);
+  border-radius:18px;
+  background: rgba(255,255,255,.03);
+  box-shadow: var(--shadow);
+  overflow:hidden;
+}
+
+.tercfg__tabs{
+  display:flex;
+  gap:8px;
+  padding:10px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  overflow:auto;
+}
+
+.tercfg__tab{
+  border:1px solid transparent;
+  background: rgba(255,255,255,.02);
+  color: rgba(232,238,252,.92);
+  padding:9px 12px;
+  border-radius:12px;
+  font-weight:900;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
+.tercfg__tab:hover{ border-color: rgba(255,255,255,.14); }
+.tercfg__tab.isActive{
+  background: rgba(96,165,250,.14);
+  border-color: rgba(96,165,250,.22);
+}
+
+.tercfg__panel{ padding:14px; }
+.tercfg__panelInner{ display:flex; flex-direction:column; gap:12px; }
+
+.tercfg__sectionTitle{
+  font-weight:900;
+  font-size:14px;
+}
+
+.tercfg__formGrid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap:12px;
+}
+
+.tercfg__field{ display:flex; flex-direction:column; gap:6px; }
+.tercfg__label{ font-weight:900; font-size:12px; color: rgba(232,238,252,.92); }
+
+.tercfg__field input,
+.tercfg__field select{
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+  outline:none;
+}
+
+.tercfg__field input:focus,
+.tercfg__field select:focus{
+  border-color: rgba(255,255,255,.25);
+}
+
+.tercfg__hint{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.02);
+  color: rgba(232,238,252,.92);
+  font-size:13px;
+}
+
+.tercfg__hintDot{
+  width:10px; height:10px;
+  border-radius:50%;
+  background: rgba(54,211,153,.85);
+  box-shadow: 0 0 0 6px rgba(54,211,153,.10);
+}
+
+.tercfg__listTop{ display:flex; justify-content:flex-start; }
+
+.tercfg__empty{
+  margin-top:10px;
+  border:1px dashed rgba(255,255,255,.16);
+  border-radius:14px;
+  padding:22px;
+  text-align:center;
+  background: rgba(255,255,255,.02);
+}
+
+.tercfg__emptyIcon{ font-size:34px; }
+.tercfg__emptyTitle{ font-weight:900; margin-top:8px; }
+
+.tercfg__list{ display:flex; flex-direction:column; gap:8px; }
+
+.tercfg__row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.02);
+}
+
+.tercfg__rowName{ font-weight:900; }
+.tercfg__remove{
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.02);
+  color: rgba(232,238,252,.92);
+  padding:7px 10px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:900;
+}
+.tercfg__remove:hover{ border-color: rgba(255,255,255,.18); }
+
+.tercfg__textarea{
+  width:100%;
+  min-height: 220px;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+  outline:none;
+  resize: vertical;
+}
+
+/* Modal */
+.tercfg__modalBackdrop{
+  position:fixed;
+  inset:0;
+  background: rgba(0,0,0,.55);
+  display:grid;
+  place-items:center;
+  padding:18px;
+  z-index: 9999;
+}
+
+.tercfg__modal{
+  width: min(560px, 100%);
+  border-radius: 14px;
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid rgba(0,0,0,.10);
+  overflow:hidden;
+}
+
+.tercfg__modalHead{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 14px;
+  border-bottom: 1px solid rgba(0,0,0,.10);
+}
+
+.tercfg__modalTitle{ font-weight:900; }
+
+.tercfg__modalClose{
+  border:none;
+  background: transparent;
+  font-size: 16px;
+  cursor:pointer;
+  padding: 6px 10px;
+  border-radius: 10px;
+}
+.tercfg__modalClose:hover{ background: rgba(0,0,0,.05); }
+
+.tercfg__modalBody{ padding: 14px; }
+
+.tercfg__modalField{ display:flex; flex-direction:column; gap:6px; }
+.tercfg__modalField label{ font-weight:900; font-size:12px; color:#111827; }
+.tercfg__modalField input{
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(0,0,0,.18);
+  outline:none;
+}
+
+.tercfg__modalActions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  padding:12px 14px;
+  border-top: 1px solid rgba(0,0,0,.10);
+}
+
+@media (max-width: 980px){
+  .tercfg__grid{ grid-template-columns: 1fr; }
+  .tercfg__formGrid{ grid-template-columns: 1fr; }
+}
