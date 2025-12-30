@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import type { RouteContext } from "next/server";
 
-export async function GET(
-  req: Request,
-  { params }: { params: { token: string } }
-) {
+export async function GET(req: Request, context: RouteContext) {
+  const token = (context.params?.token as string) ?? "";
+
   const supabase = createClient(
     process.env.SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -14,7 +14,7 @@ export async function GET(
   const { data, error } = await supabase
     .from("invites")
     .select("id, token, role, house_id, expires_at, used_at")
-    .eq("token", params.token)
+    .eq("token", token)
     .maybeSingle();
 
   if (error || !data) {
@@ -29,7 +29,6 @@ export async function GET(
     return NextResponse.json({ error: "Convite expirado" }, { status: 410 });
   }
 
-  // 🔑 ISSO AQUI É O QUE FALTAVA
   return NextResponse.json({
     id: data.id,
     token: data.token,
