@@ -815,3 +815,65 @@ button.sidebar__item:focus{
   .signup__footer{ flex-direction: column; align-items: stretch; }
   .signup__footer .btn{ width: 100%; }
 }
+
+/* ===== ESQUECI SENHA (isolado) ===== */
+.forgot{ padding: 64px 0 72px; }
+
+.forgot__card{
+  width: min(520px, 100%);
+  margin: 0 auto;
+  border: 1px solid var(--border);
+  background: rgba(7,16,31,.55);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
+
+.forgot__title{
+  margin: 0 0 6px;
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+.forgot__sub{ margin: 0 0 14px; }
+
+.forgot__form{ display: grid; gap: 12px; }
+
+.forgot__field{ display: grid; gap: 6px; }
+
+.forgot__field label{
+  font-weight: 800;
+  font-size: 13px;
+  color: rgba(232,238,252,.92);
+}
+
+.forgot__field input{
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+  outline: none;
+}
+
+.forgot__field input:focus{
+  border-color: rgba(255,255,255,.25);
+}
+
+.forgot__btnFull{ width: 100%; }
+
+.forgot__footer{
+  margin-top: 6px;
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+}
+
+.forgot__link{ font-weight: 800; }
+.forgot__link:hover{ text-decoration: underline; }
+
+.forgot__micro{
+  text-align: center;
+  margin: 0;
+}
