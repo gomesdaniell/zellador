@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
 
 type OnboardingSettings = {
   versionId: string;
@@ -79,16 +80,63 @@ function saveSettings(s: OnboardingSettings) {
 }
 
 export default function SettingsOnboardingPage() {
+  // Supabase client (browser)
+  const supabase = useMemo(
+    () =>
+      createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      ),
+    []
+  );
+
   const [loaded, setLoaded] = useState(false);
   const [savedToast, setSavedToast] = useState<string | null>(null);
-
   const [settings, setSettings] = useState<OnboardingSettings | null>(null);
 
+  // House do usuário logado (profiles.active_house_id)
+  const [activeHouseId, setActiveHouseId] = useState<string | null>(null);
+  const [houseLoading, setHouseLoading] = useState(true);
+
+  // carrega settings (localStorage) - por enquanto
   useEffect(() => {
     const s = loadSettings();
     setSettings(s);
     setLoaded(true);
   }, []);
+
+  // carrega active_house_id do profile logado
+  useEffect(() => {
+    async function loadActiveHouse() {
+      setHouseLoading(true);
+
+      const { data: auth } = await supabase.auth.getUser();
+      const userId = auth?.user?.id;
+
+      if (!userId) {
+        setActiveHouseId(null);
+        setHouseLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("active_house_id")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Erro ao carregar active_house_id:", error.message);
+        setActiveHouseId(null);
+      } else {
+        setActiveHouseId((data?.active_house_id as string) ?? null);
+      }
+
+      setHouseLoading(false);
+    }
+
+    loadActiveHouse();
+  }, [supabase]);
 
   const preview = useMemo(() => {
     if (!settings) return "";
@@ -127,6 +175,7 @@ export default function SettingsOnboardingPage() {
 
   function handleResetDefaults() {
     if (!confirm("Restaurar padrões? Você perderá as alterações atuais.")) return;
+
     const now = new Date().toISOString();
     const reset: OnboardingSettings = {
       versionId: newVersionId(),
@@ -145,37 +194,49 @@ export default function SettingsOnboardingPage() {
       contractText: DEFAULT_CONTRACT,
       houseName: "Sua casa",
     };
+
     saveSettings(reset);
     setSettings(reset);
     setSavedToast("Padrões restaurados!");
     window.setTimeout(() => setSavedToast(null), 2200);
-  };
+  }
 
   async function gerarConvite(role: "medium" | "consulente") {
-  try {
-    const res = await fetch("/api/invites/create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        house_id: activeHouseId, // 👈 já existente no seu contexto
-        role,
-      }),
-    });
+    try {
+      if (houseLoading) {
+        alert("Carregando dados da casa... aguarde 1 segundo e tente de novo.");
+        return;
+      }
 
-    const json = await res.json();
+      if (!activeHouseId) {
+        alert(
+          "Não encontrei a casa ativa do seu usuário (profiles.active_house_id). Verifique se seu profile está vinculado a uma house."
+        );
+        return;
+      }
 
-    if (!res.ok) {
-      alert(json.error || "Erro ao gerar convite");
-      return;
+      const res = await fetch("/api/invites/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          house_id: activeHouseId,
+          role,
+        }),
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        alert(json.error || "Erro ao gerar convite");
+        return;
+      }
+
+      await navigator.clipboard.writeText(json.link);
+      alert("Convite gerado e link copiado!");
+    } catch (e) {
+      alert("Falha ao gerar convite");
     }
-
-    await navigator.clipboard.writeText(json.link);
-    alert("Convite gerado e link copiado!");
-  } catch (e) {
-    alert("Falha ao gerar convite");
   }
-}
-
 
   return (
     <div className="page">
@@ -189,6 +250,11 @@ export default function SettingsOnboardingPage() {
             Versão atual: <strong>{settings.versionId}</strong> • Atualizado em{" "}
             {new Date(settings.updatedAt).toLocaleString("pt-BR")}
           </div>
+
+          <div className="muted" style={{ marginTop: 6 }}>
+            Casa ativa:{" "}
+            <strong>{houseLoading ? "carregando..." : activeHouseId ? activeHouseId : "não definida"}</strong>
+          </div>
         </div>
 
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
@@ -201,15 +267,23 @@ export default function SettingsOnboardingPage() {
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: 12 }}>
-  <button onClick={() => gerarConvite("medium")}>
-    Gerar convite – Médium
-  </button>
+      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
+        <button
+          className="btn"
+          disabled={houseLoading || !activeHouseId}
+          onClick={() => gerarConvite("medium")}
+        >
+          Gerar convite – Médium
+        </button>
 
-  <button onClick={() => gerarConvite("consulente")}>
-    Gerar convite – Consulente
-  </button>
-</div>
+        <button
+          className="btn"
+          disabled={houseLoading || !activeHouseId}
+          onClick={() => gerarConvite("consulente")}
+        >
+          Gerar convite – Consulente
+        </button>
+      </div>
 
       {savedToast && <div className="toast">{savedToast}</div>}
 
