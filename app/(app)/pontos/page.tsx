@@ -46,7 +46,6 @@ function guessContentKind(item: PontoItem) {
     if (u.includes("spotify.com")) return "SPOTIFY";
     return "LINK";
   }
-  // arquivo
   const m = (item.fileMime || "").toLowerCase();
   if (m.startsWith("audio/")) return "AUDIO";
   if (m.startsWith("video/")) return "VIDEO";
@@ -67,7 +66,6 @@ function iconFor(item: PontoItem) {
 }
 
 function buildYouTubeEmbed(url: string) {
-  // suporta youtu.be/<id> e youtube.com/watch?v=<id>
   try {
     const u = new URL(url);
     if (u.hostname.includes("youtu.be")) {
@@ -83,11 +81,9 @@ function buildYouTubeEmbed(url: string) {
 }
 
 function buildSpotifyEmbed(url: string) {
-  // transforma https://open.spotify.com/track/... em embed
   try {
     const u = new URL(url);
     if (!u.hostname.includes("spotify.com")) return "";
-    // pega /track/<id> | /playlist/<id> | /album/<id>
     const parts = u.pathname.split("/").filter(Boolean);
     if (parts.length < 2) return "";
     const kind = parts[0];
@@ -98,7 +94,6 @@ function buildSpotifyEmbed(url: string) {
 }
 
 export default function PontosPage() {
-  // mock (você pode deixar vazio)
   const [items, setItems] = useState<PontoItem[]>([]);
 
   const [q, setQ] = useState("");
@@ -110,7 +105,6 @@ export default function PontosPage() {
   const [openAdd, setOpenAdd] = useState(false);
   const [openView, setOpenView] = useState<PontoItem | null>(null);
 
-  // form
   const [conteudoTipo, setConteudoTipo] = useState<ConteudoTipo>("ARQUIVO");
   const [form, setForm] = useState({
     titulo: "",
@@ -170,7 +164,6 @@ export default function PontosPage() {
         alert("Cole um link (YouTube/Spotify/URL).");
         return;
       }
-      // valida URL básica
       try {
         new URL(url);
       } catch {
@@ -194,7 +187,6 @@ export default function PontosPage() {
       return;
     }
 
-    // ARQUIVO
     if (!form.file) {
       alert("Envie um arquivo (PDF/DOC/MP3/MP4/Imagem).");
       return;
@@ -223,7 +215,9 @@ export default function PontosPage() {
     setItems((prev) => {
       const found = prev.find((x) => x.id === id);
       if (found?.conteudoTipo === "ARQUIVO" && found.fileUrl) {
-        try { URL.revokeObjectURL(found.fileUrl); } catch {}
+        try {
+          URL.revokeObjectURL(found.fileUrl);
+        } catch {}
       }
       return prev.filter((x) => x.id !== id);
     });
@@ -260,18 +254,35 @@ export default function PontosPage() {
       <div className="pts__controls">
         <div className="pts__search">
           <span className="pts__searchIcon">🔎</span>
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Buscar por nome, linha, orixá, tags..."
-          />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por nome, linha, orixá, tags..." />
         </div>
 
         <div className="pts__filters">
-          <Select label="Tipo" value={fTipo} onChange={setFTipo} options={["Todos", ...TIPOS]} />
-          <Select label="Linha" value={fLinha} onChange={setFLinha} options={["Todos", ...LINHAS]} />
-          <Select label="Orixá" value={fOrixa} onChange={setFOrixa} options={["Todos", ...ORIXAS]} />
-          <Select label="Conteúdo" value={fConteudo} onChange={setFConteudo} options={["Todos", "ARQUIVO", "LINK"]} />
+          {/* ✅ CORRIGIDO: wrappers com cast explícito */}
+          <Select
+            label="Tipo"
+            value={fTipo}
+            onChange={(v) => setFTipo(v as PontoTipo | "Todos")}
+            options={["Todos", ...TIPOS]}
+          />
+          <Select
+            label="Linha"
+            value={fLinha}
+            onChange={(v) => setFLinha(v as string | "Todos")}
+            options={["Todos", ...LINHAS]}
+          />
+          <Select
+            label="Orixá"
+            value={fOrixa}
+            onChange={(v) => setFOrixa(v as string | "Todos")}
+            options={["Todos", ...ORIXAS]}
+          />
+          <Select
+            label="Conteúdo"
+            value={fConteudo}
+            onChange={(v) => setFConteudo(v as ConteudoTipo | "Todos")}
+            options={["Todos", "ARQUIVO", "LINK"]}
+          />
         </div>
       </div>
 
@@ -287,9 +298,11 @@ export default function PontosPage() {
               <div className="pts__cardTop">
                 <div className="pts__icon">{iconFor(it)}</div>
                 <div className="pts__meta">
-                  <div className="pts__title" title={it.titulo}>{it.titulo}</div>
+                  <div className="pts__title" title={it.titulo}>
+                    {it.titulo}
+                  </div>
                   <div className="pts__sub muted">
-                    {prettyDate(it.criadoEm)} • {it.conteudoTipo === "ARQUIVO" ? (it.fileName || "Arquivo") : "Link"}
+                    {prettyDate(it.criadoEm)} • {it.conteudoTipo === "ARQUIVO" ? it.fileName || "Arquivo" : "Link"}
                   </div>
                 </div>
               </div>
@@ -298,7 +311,11 @@ export default function PontosPage() {
                 <span className="pts__chip">{it.tipo}</span>
                 <span className="pts__chip">{it.linha}</span>
                 <span className="pts__chip">{it.orixa}</span>
-                {it.conteudoTipo === "LINK" ? <span className="pts__chip pts__chip--link">Link</span> : <span className="pts__chip pts__chip--file">Arquivo</span>}
+                {it.conteudoTipo === "LINK" ? (
+                  <span className="pts__chip pts__chip--link">Link</span>
+                ) : (
+                  <span className="pts__chip pts__chip--file">Arquivo</span>
+                )}
               </div>
 
               {it.tags ? <div className="pts__tags muted">Tags: {it.tags}</div> : <div className="pts__tags muted"> </div>}
@@ -356,7 +373,9 @@ export default function PontosPage() {
                 <Field label="Tipo do ponto">
                   <select value={form.tipo} onChange={(e) => setForm((p) => ({ ...p, tipo: e.target.value as PontoTipo }))}>
                     {TIPOS.map((t) => (
-                      <option key={t} value={t}>{t}</option>
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
                     ))}
                   </select>
                 </Field>
@@ -365,7 +384,9 @@ export default function PontosPage() {
                   <select value={form.linha} onChange={(e) => setForm((p) => ({ ...p, linha: e.target.value }))}>
                     <option value="">Selecione</option>
                     {LINHAS.map((t) => (
-                      <option key={t} value={t}>{t}</option>
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
                     ))}
                   </select>
                 </Field>
@@ -374,7 +395,9 @@ export default function PontosPage() {
                   <select value={form.orixa} onChange={(e) => setForm((p) => ({ ...p, orixa: e.target.value }))}>
                     <option value="">Selecione</option>
                     {ORIXAS.map((t) => (
-                      <option key={t} value={t}>{t}</option>
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
                     ))}
                   </select>
                 </Field>
@@ -389,10 +412,7 @@ export default function PontosPage() {
                   </Field>
                 ) : (
                   <Field label="Arquivo (PDF/DOC/MP3/MP4/Imagem)">
-                    <input
-                      type="file"
-                      onChange={(e) => setForm((p) => ({ ...p, file: e.target.files?.[0] || null }))}
-                    />
+                    <input type="file" onChange={(e) => setForm((p) => ({ ...p, file: e.target.files?.[0] || null }))} />
                   </Field>
                 )}
 
@@ -405,9 +425,7 @@ export default function PontosPage() {
                 </Field>
               </div>
 
-              <div className="pts__hint muted">
-                Dica: cadastre rápido. O valor aqui é achar e abrir em 2 cliques.
-              </div>
+              <div className="pts__hint muted">Dica: cadastre rápido. O valor aqui é achar e abrir em 2 cliques.</div>
             </div>
 
             <div className="pts__modalFoot">
@@ -438,7 +456,11 @@ export default function PontosPage() {
                 <span className="pts__chip">{openView.tipo}</span>
                 <span className="pts__chip">{openView.linha}</span>
                 <span className="pts__chip">{openView.orixa}</span>
-                {openView.conteudoTipo === "LINK" ? <span className="pts__chip pts__chip--link">Link</span> : <span className="pts__chip pts__chip--file">Arquivo</span>}
+                {openView.conteudoTipo === "LINK" ? (
+                  <span className="pts__chip pts__chip--link">Link</span>
+                ) : (
+                  <span className="pts__chip pts__chip--file">Arquivo</span>
+                )}
               </div>
 
               <ViewerContent item={openView} />
@@ -500,7 +522,6 @@ function ViewerContent({ item }: { item: PontoItem }) {
     );
   }
 
-  // arquivo
   if (!item.fileUrl) {
     return <div className="pts__viewerNote muted">Arquivo não disponível (MVP / state local).</div>;
   }
@@ -509,7 +530,9 @@ function ViewerContent({ item }: { item: PontoItem }) {
     return (
       <div className="pts__player">
         <audio controls src={item.fileUrl} />
-        <div className="muted" style={{ marginTop: 8 }}>{item.fileName}</div>
+        <div className="muted" style={{ marginTop: 8 }}>
+          {item.fileName}
+        </div>
       </div>
     );
   }
@@ -518,7 +541,9 @@ function ViewerContent({ item }: { item: PontoItem }) {
     return (
       <div className="pts__player">
         <video controls src={item.fileUrl} />
-        <div className="muted" style={{ marginTop: 8 }}>{item.fileName}</div>
+        <div className="muted" style={{ marginTop: 8 }}>
+          {item.fileName}
+        </div>
       </div>
     );
   }
@@ -532,7 +557,6 @@ function ViewerContent({ item }: { item: PontoItem }) {
     );
   }
 
-  // PDF e outros: MVP seguro = mostrar instrução (abre em nova aba pelo botão)
   return (
     <div className="pts__viewerNote">
       <div className="muted">
