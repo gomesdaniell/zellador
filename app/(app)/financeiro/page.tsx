@@ -1,7 +1,7 @@
 export default function Page() {
   return (
     <div className="appPage">
-      <h1 className="appTitle">Eventos</h1>
+      <h1 className="appTitle">Financeiro</h1>
       <p className="muted">Tela em construção.</p>
     </div>
   );
