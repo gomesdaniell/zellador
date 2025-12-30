@@ -10,6 +10,9 @@ const items: Item[] = [
   { label: "Dashboard", href: "/dashboard", icon: "🏠" },
 
   { label: "Membros", href: "/members", icon: "👥", group: "Rotina" },
+  { label: "Médiuns", href: "/members/mediuns", icon: "🧑‍🦳", group: "Rotina" },
+  { label: "Consulentes", href: "/members/consulentes", icon: "🪪", group: "Rotina" },
+
   { label: "Giras", href: "/giras", icon: "🕯️", group: "Rotina" },
   { label: "Camarinha", href: "/camarinha", icon: "🎽", group: "Rotina" },
   { label: "Eventos", href: "/events", icon: "📅", group: "Rotina" },
@@ -54,6 +57,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   const grouped = groupItems(items);
+  const isMembersRoute = pathname?.startsWith("/members");
+  const [membersOpen, setMembersOpen] = useState(true);
+
+  useEffect(() => {
+  if (isMembersRoute) setMembersOpen(true);
+  }, [isMembersRoute]);
 
   return (
     <div className="appShell">
