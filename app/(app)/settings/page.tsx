@@ -18,6 +18,18 @@ export default function SettingsHome() {
             </div>
           </div>
         </Link>
+
+        <Link className="cardLink" href="/members/invites">
+          <div className="cardLink__icon">🔗</div>
+          <div>
+            <strong>Convites</strong>
+            <div className="muted">
+              Gere links para cadastro (médium/consulente) e acompanhe status.
+            </div>
+          </div>
+        </Link>
+
+        
       </div>
     </div>
   );
