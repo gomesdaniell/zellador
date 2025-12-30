@@ -8,7 +8,7 @@ export default async function DashboardPage() {
   if (!auth.user) redirect("/login");
 
   const { data: memberships } = await supabase
-    .from("memberships")
+    .from("house_users")
     .select("role, houses:house_id (id, name)")
     .eq("user_id", auth.user.id);
 
