@@ -601,3 +601,13 @@ button.sidebar__item:focus{
   border: 1px solid rgba(21, 128, 61, .35);
   font-weight: 700;
 }
+
+.field select{
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color: inherit;
+  outline: none;
+}
