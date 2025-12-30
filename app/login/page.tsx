@@ -22,7 +22,7 @@ export default function LoginPage() {
           <div className="topbar__cta">
             <a className="btn btn--ghost" href="/#contato">Quero conhecer</a>
             <a className="btn btn--ghost" href="/login">Login</a>
-            <a className="btn btn--primary" href="/login?mode=signup">Experimente grátis</a>
+            <a className="btn btn--primary" href="/signup">Experimente grátis</a>
           </div>
         </div>
       </header>
@@ -57,7 +57,7 @@ export default function LoginPage() {
                 <a className="btn btn--ghost" href="/">Voltar</a>
 
                 <p className="muted">
-                  Ainda não tem cadastro? <a className="login__link" href="/login?mode=signup">Criar conta</a>
+                  Ainda não tem cadastro? <a className="login__link" href="/signup">Criar conta</a>
                 </p>
               </div>
             </form>
