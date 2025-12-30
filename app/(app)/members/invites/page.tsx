@@ -25,6 +25,9 @@ export default function MembersInvitesPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // 🔹 NOVO: guarda o último link criado
+  const [lastInviteLink, setLastInviteLink] = useState<string | null>(null);
+
   /* =========================
      HOUSE ATIVA (MVP)
   ========================== */
@@ -99,6 +102,9 @@ export default function MembersInvitesPage() {
       return;
     }
 
+    // 🔹 NOVO: salva o link retornado pela API
+    setLastInviteLink(json.link);
+
     showToast("Convite criado!");
     loadInvites();
   }
@@ -152,6 +158,32 @@ export default function MembersInvitesPage() {
           {loading ? "Gerando..." : "Gerar link"}
         </button>
       </div>
+
+      {/* 🔹 NOVO: bloco para copiar link recém-criado */}
+      {lastInviteLink && (
+        <div
+          style={{
+            marginTop: 12,
+            padding: 12,
+            borderRadius: 8,
+            background: "rgba(255,255,255,0.06)",
+            display: "flex",
+            gap: 10,
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <span style={{ wordBreak: "break-all" }}>{lastInviteLink}</span>
+          <button
+            onClick={async () => {
+              await navigator.clipboard.writeText(lastInviteLink);
+              showToast("Link copiado!");
+            }}
+          >
+            Copiar
+          </button>
+        </div>
+      )}
 
       <input
         value={q}
