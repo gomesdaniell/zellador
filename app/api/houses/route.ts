@@ -2,21 +2,26 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
-function slugify(s: string) {
+/* =========================
+   Utils
+========================= */
+function slugifyBase(s: string) {
   return s
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "")
-    .slice(0, 60);
+    .slice(0, 50);
 }
 
+/* =========================
+   POST /api/houses
+========================= */
 export async function POST(req: Request) {
-  // Next 15: cookies() pode ser async dependendo da versão/runtime
+  // Next 15: cookies pode ser async
   const cookieStore = await cookies();
 
-  // Vamos capturar cookies que o Supabase quiser atualizar
   const cookiesToSet: Array<{ name: string; value: string; options: any }> = [];
 
   const supabase = createServerClient(
@@ -27,62 +32,91 @@ export async function POST(req: Request) {
         getAll() {
           return cookieStore.getAll();
         },
-        setAll(c) {
-          c.forEach((cookie) => cookiesToSet.push(cookie));
+        setAll(cookies) {
+          cookies.forEach((c) => cookiesToSet.push(c));
         },
       },
     }
   );
 
+  /* =========================
+     Auth
+  ========================= */
   const { data: auth } = await supabase.auth.getUser();
 
   if (!auth.user) {
     const res = NextResponse.json({ error: "unauthorized" }, { status: 401 });
-    cookiesToSet.forEach(({ name, value, options }) => res.cookies.set(name, value, options));
+    cookiesToSet.forEach(({ name, value, options }) =>
+      res.cookies.set(name, value, options)
+    );
     return res;
   }
 
+  /* =========================
+     Body
+  ========================= */
   const body = await req.json().catch(() => ({}));
   const name = String(body?.name || "").trim();
 
   if (name.length < 2) {
-    const res = NextResponse.json({ error: "Nome da casa inválido." }, { status: 400 });
-    cookiesToSet.forEach(({ name, value, options }) => res.cookies.set(name, value, options));
+    const res = NextResponse.json(
+      { error: "Nome da casa inválido." },
+      { status: 400 }
+    );
+    cookiesToSet.forEach(({ name, value, options }) =>
+      res.cookies.set(name, value, options)
+    );
     return res;
   }
 
-  // 1) cria a casa
-  const { data: house, error: e1 } = await supabase
-  .from("houses")
-  .insert({
-    name,
-    slug: slugify(name),
-    owner_id: auth.user.id, // 🔑 ESSENCIAL
-  })
-  .select("id")
-  .single();
+  /* =========================
+     Slug único
+  ========================= */
+  const baseSlug = slugifyBase(name);
+  let slug = baseSlug;
+  let attempt = 1;
 
+  while (true) {
+    const { data: exists, error } = await supabase
+      .from("houses")
+      .select("id")
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (error) {
+      const res = NextResponse.json({ error: error.message }, { status: 400 });
+      cookiesToSet.forEach(({ name, value, options }) =>
+        res.cookies.set(name, value, options)
+      );
+      return res;
+    }
+
+    if (!exists) break;
+
+    attempt += 1;
+    slug = `${baseSlug}-${attempt}`;
+  }
+
+  /* =========================
+     1) Criar casa
+  ========================= */
+  const { data: house, error: e1 } = await supabase
+    .from("houses")
+    .insert({
+      name,
+      slug,
+      owner_id: auth.user.id, // ESSENCIAL p/ RLS
+    })
+    .select("id")
+    .single();
 
   if (e1) {
     const res = NextResponse.json({ error: e1.message }, { status: 400 });
-    cookiesToSet.forEach(({ name, value, options }) => res.cookies.set(name, value, options));
+    cookiesToSet.forEach(({ name, value, options }) =>
+      res.cookies.set(name, value, options)
+    );
     return res;
   }
 
-  // 2) vincula usuário na casa
-  const { error: e2 } = await supabase.from("house_users").insert({
-    user_id: auth.user.id,
-    house_id: house.id,
-    role: "owner",
-  });
-
-  if (e2) {
-    const res = NextResponse.json({ error: e2.message }, { status: 400 });
-    cookiesToSet.forEach(({ name, value, options }) => res.cookies.set(name, value, options));
-    return res;
-  }
-
-  const res = NextResponse.json({ ok: true, house_id: house.id });
-  cookiesToSet.forEach(({ name, value, options }) => res.cookies.set(name, value, options));
-  return res;
-}
+  /* =========================
+     2
