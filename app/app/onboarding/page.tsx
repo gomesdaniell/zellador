@@ -2,19 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabaseBrowser } from "../../../lib/supabase/client";
-
-function slugify(s: string) {
-  return s
-    .toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "")
-    .slice(0, 60);
-}
 
 export default function OnboardingPage() {
-  const supabase = supabaseBrowser();
   const router = useRouter();
 
   const [name, setName] = useState("");
@@ -34,28 +23,20 @@ export default function OnboardingPage() {
     setLoading(true);
 
     try {
-      const { data: auth } = await supabase.auth.getUser();
-// aqui auth.user pode ser usado com segurança
-const user = auth.user!;
+      const res = await fetch("/api/houses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
 
+      const json = await res.json().catch(() => ({}));
 
-      const slug = slugify(name);
-
-      // 1) cria house
-      const { data: house, error: e1 } = await supabase
-        .from("houses")
-        .insert({ name, slug, created_by: user.id })
-        .select("id")
-        .single();
-
-      if (e1) throw e1;
-
-      // 2) cria membership owner
-      const { error: e2 } = await supabase
-        .from("house_users")
-        .insert({ user_id: user.id, house_id: house.id, role: "owner" });
-
-      if (e2) throw e2;
+      if (!res.ok) {
+        if (res.status === 401) {
+          throw new Error("Você precisa estar logado. Faça login novamente.");
+        }
+        throw new Error(json?.error || "Erro ao criar a casa.");
+      }
 
       router.push("/app/dashboard");
       router.refresh();
@@ -84,6 +65,7 @@ const user = auth.user!;
             borderRadius: 12,
             border: "1px solid rgba(255,255,255,.15)",
             background: "rgba(255,255,255,.04)",
+            color: "inherit",
           }}
         />
 
