@@ -1,8 +1,7 @@
 'use client';
 
+import React, { useEffect, useMemo, useState } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase/client';
-
-const supabase = createSupabaseBrowser();
 
 useEffect(() => {
   supabase.auth.getSession().then(({ data }) => {
