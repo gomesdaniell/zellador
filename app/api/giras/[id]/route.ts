@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase/server';
 
 export async function PATCH(req: Request, context: any) {
-  const supabase = await createSupabaseServer();
-
+  const supabase = await createSupabaseServer(); // ✅ AQUI
   const body = await req.json();
   const id = context.params.id;
 
@@ -30,7 +29,7 @@ export async function PATCH(req: Request, context: any) {
 }
 
 export async function DELETE(_req: Request, context: any) {
-  const supabase = createSupabaseServer();
+  const supabase = await createSupabaseServer(); // ✅ AQUI
   const id = context.params.id;
 
   const { error } = await supabase
