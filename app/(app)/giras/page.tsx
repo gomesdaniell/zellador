@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 type GiraTipo =
   | 'Cura'
@@ -17,7 +17,8 @@ type GiraStatus = 'Agendada' | 'Confirmada' | 'Realizada' | 'Cancelada';
 
 type Gira = {
   id: string;
-  dataISO: string; // YYYY-MM-DD
+  casa_id: string;
+  data: string; // YYYY-MM-DD
   inicio: string; // HH:mm
   fim: string; // HH:mm
   tipo: GiraTipo;
@@ -61,72 +62,29 @@ function getMonthKey(dateISO: string) {
 function monthLabel(yyyyMm: string) {
   const [y, m] = yyyyMm.split('-').map(Number);
   const names = [
-    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+    'Janeiro',
+    'Fevereiro',
+    'Março',
+    'Abril',
+    'Maio',
+    'Junho',
+    'Julho',
+    'Agosto',
+    'Setembro',
+    'Outubro',
+    'Novembro',
+    'Dezembro',
   ];
   return `${names[m - 1]} ${y}`;
 }
 
-/**
- * MVP: ainda usando mock local.
- * Quando você ligar a API do Supabase:
- * - troque MOCK_GIRAS por state + fetch('/api/giras?casa_id=...')
- * - e no modal troque o "alert" pelos POST/PATCH
- */
-const MOCK_GIRAS: Gira[] = [
-  {
-    id: 'g1',
-    dataISO: '2025-12-28',
-    inicio: '18:30',
-    fim: '23:00',
-    tipo: 'Atendimento',
-    status: 'Realizada',
-    titulo: 'Gira de Atendimento',
-    observacoes: 'Acolhimento e consultas.',
-  },
-  {
-    id: 'g2',
-    dataISO: '2026-01-04',
-    inicio: '18:30',
-    fim: '23:00',
-    tipo: 'Desenvolvimento',
-    status: 'Confirmada',
-    titulo: 'Desenvolvimento Mediúnico',
-    observacoes: 'Parte prática + alinhamentos.',
-  },
-  {
-    id: 'g3',
-    dataISO: '2026-01-11',
-    inicio: '18:30',
-    fim: '23:00',
-    tipo: 'Exu',
-    status: 'Agendada',
-    titulo: 'Gira de Exu',
-    observacoes: 'Firmeza e organização.',
-  },
-  {
-    id: 'g4',
-    dataISO: '2026-01-18',
-    inicio: '18:30',
-    fim: '23:00',
-    tipo: 'PretoVelho',
-    status: 'Agendada',
-    titulo: 'Gira de Preto-Velho',
-    observacoes: null,
-  },
-  {
-    id: 'g5',
-    dataISO: '2026-01-25',
-    inicio: '18:30',
-    fim: '23:00',
-    tipo: 'Caboclo',
-    status: 'Agendada',
-    titulo: 'Gira de Caboclo',
-    observacoes: null,
-  },
-];
-
 export default function GirasPage() {
+  const [casaId, setCasaId] = useState<string | null>(null);
+
+  const [giras, setGiras] = useState<Gira[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadErr, setLoadErr] = useState<string | null>(null);
+
   const [q, setQ] = useState('');
   const [tipo, setTipo] = useState<GiraTipo | 'Todos'>('Todos');
   const [status, setStatus] = useState<GiraStatus | 'Todos'>('Todos');
@@ -146,26 +104,77 @@ export default function GirasPage() {
     setModalOpen(true);
   }
 
-  const mesesDisponiveis = useMemo(() => {
-    const set = new Set(MOCK_GIRAS.map((g) => getMonthKey(g.dataISO)));
-    return Array.from(set).sort();
+  useEffect(() => {
+    const id = typeof window !== 'undefined' ? localStorage.getItem('casa_id') : null;
+    setCasaId(id);
   }, []);
+
+  async function loadGiras(forCasaId?: string | null) {
+    const id = forCasaId ?? casaId;
+    if (!id) {
+      setLoadErr(
+        'casa_id não definido. Defina no console: localStorage.setItem("casa_id","UUID_DA_CASA") e recarregue.'
+      );
+      setGiras([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setLoadErr(null);
+
+    try {
+      const res = await fetch(`/api/giras?casa_id=${encodeURIComponent(id)}`, { cache: 'no-store' });
+      const json = await res.json().catch(() => null);
+
+      if (!res.ok) throw new Error(json?.error ?? 'Falha ao carregar giras');
+
+      setGiras(Array.isArray(json) ? json : []);
+    } catch (e: any) {
+      setLoadErr(e?.message ?? 'Erro ao carregar giras');
+      setGiras([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (casaId) loadGiras(casaId);
+  }, [casaId]);
+
+  async function removeGira(id: string) {
+    if (!confirm('Excluir esta gira?')) return;
+
+    try {
+      const res = await fetch(`/api/giras/${id}`, { method: 'DELETE' });
+      const json = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(json?.error ?? 'Falha ao excluir');
+      await loadGiras();
+    } catch (e: any) {
+      alert(e?.message ?? 'Erro ao excluir');
+    }
+  }
+
+  const mesesDisponiveis = useMemo(() => {
+    const set = new Set(giras.map((g) => getMonthKey(g.data)));
+    return Array.from(set).sort();
+  }, [giras]);
 
   const filtradas = useMemo(() => {
     const query = q.trim().toLowerCase();
 
-    return MOCK_GIRAS
+    return giras
       .slice()
-      .sort((a, b) => a.dataISO.localeCompare(b.dataISO))
+      .sort((a, b) => (a.data + a.inicio).localeCompare(b.data + b.inicio))
       .filter((g) => (tipo === 'Todos' ? true : g.tipo === tipo))
       .filter((g) => (status === 'Todos' ? true : g.status === status))
-      .filter((g) => (mes === 'Todos' ? true : getMonthKey(g.dataISO) === mes))
+      .filter((g) => (mes === 'Todos' ? true : getMonthKey(g.data) === mes))
       .filter((g) => {
         if (!query) return true;
-        const hay = `${g.titulo} ${g.tipo} ${g.status} ${g.observacoes ?? ''} ${g.dataISO}`.toLowerCase();
+        const hay = `${g.titulo} ${g.tipo} ${g.status} ${g.observacoes ?? ''} ${g.data}`.toLowerCase();
         return hay.includes(query);
       });
-  }, [q, tipo, status, mes]);
+  }, [giras, q, tipo, status, mes]);
 
   return (
     <div className="page">
@@ -173,13 +182,18 @@ export default function GirasPage() {
         <div className="page-title">
           <h1>Giras</h1>
           <p className="muted">Visualização consolidada por tipo, com filtros simples (sem sidebar redundante).</p>
+          {casaId && (
+            <p className="muted" style={{ marginTop: 6, fontSize: 12 }}>
+              Casa ativa: {casaId}
+            </p>
+          )}
         </div>
 
         <div className="page-actions">
           <button className="btn btn-ghost" onClick={() => setView((v) => (v === 'cards' ? 'lista' : 'cards'))}>
             {view === 'cards' ? 'Ver em lista' : 'Ver em cards'}
           </button>
-          <button className="btn btn-primary" onClick={openNew}>
+          <button className="btn btn-primary" onClick={openNew} disabled={!casaId}>
             + Nova gira
           </button>
         </div>
@@ -235,7 +249,17 @@ export default function GirasPage() {
         </div>
       </section>
 
-      {view === 'cards' ? (
+      {loadErr && (
+        <div className="form-error" style={{ margin: '10px 0' }}>
+          {loadErr}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="muted" style={{ padding: 18 }}>
+          Carregando giras...
+        </div>
+      ) : view === 'cards' ? (
         <section className="grid">
           {filtradas.map((g) => {
             const tipoMeta = TIPOS.find((t) => t.value === g.tipo);
@@ -245,7 +269,7 @@ export default function GirasPage() {
               <article key={g.id} className={`card ${tipoMeta?.badge ?? ''}`}>
                 <div className="card-top">
                   <div className="card-date">
-                    <div className="date-big">{formatBR(g.dataISO)}</div>
+                    <div className="date-big">{formatBR(g.data)}</div>
                     <div className="date-small">
                       {g.inicio} – {g.fim}
                     </div>
@@ -260,20 +284,30 @@ export default function GirasPage() {
                     <span className="badge badge-soft">Sábado</span>
                   </div>
 
-                  {g.observacoes ? <p className="card-note">{g.observacoes}</p> : <p className="card-note muted">Sem observações.</p>}
+                  {g.observacoes ? (
+                    <p className="card-note">{g.observacoes}</p>
+                  ) : (
+                    <p className="card-note muted">Sem observações.</p>
+                  )}
                 </div>
 
                 <div className="card-footer">
-                  <button className="btn btn-ghost" onClick={() => alert(`Abrir detalhes: ${g.id}`)}>
-                    Detalhes
-                  </button>
                   <button className="btn btn-ghost" onClick={() => openEdit(g)}>
                     Editar
+                  </button>
+                  <button className="btn btn-ghost" onClick={() => removeGira(g.id)}>
+                    Excluir
                   </button>
                 </div>
               </article>
             );
           })}
+
+          {filtradas.length === 0 && (
+            <div className="muted" style={{ padding: 18 }}>
+              Nenhuma gira encontrada com esses filtros.
+            </div>
+          )}
         </section>
       ) : (
         <section className="table-wrap">
@@ -293,7 +327,7 @@ export default function GirasPage() {
                 const statusMeta = STATUS.find((s) => s.value === g.status);
                 return (
                   <tr key={g.id}>
-                    <td>{formatBR(g.dataISO)}</td>
+                    <td>{formatBR(g.data)}</td>
                     <td>
                       {g.inicio} – {g.fim}
                     </td>
@@ -305,11 +339,11 @@ export default function GirasPage() {
                       <span className={`pill ${statusMeta?.pill ?? ''}`}>{g.status}</span>
                     </td>
                     <td className="right">
-                      <button className="btn btn-ghost btn-sm" onClick={() => alert(`Detalhes: ${g.id}`)}>
-                        Detalhes
-                      </button>
                       <button className="btn btn-ghost btn-sm" onClick={() => openEdit(g)}>
                         Editar
+                      </button>
+                      <button className="btn btn-ghost btn-sm" onClick={() => removeGira(g.id)}>
+                        Excluir
                       </button>
                     </td>
                   </tr>
@@ -332,9 +366,9 @@ export default function GirasPage() {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         initial={editing}
+        casaId={casaId}
         onSaved={async () => {
-          // aqui você vai chamar loadGiras() quando ligar a API
-          alert('MVP: depois liga o POST/PATCH aqui');
+          await loadGiras();
         }}
       />
     </div>
@@ -345,17 +379,19 @@ function GiraModal({
   open,
   onClose,
   initial,
+  casaId,
   onSaved,
 }: {
   open: boolean;
   onClose: () => void;
   initial?: Partial<Gira> | null;
+  casaId: string | null;
   onSaved: () => Promise<void> | void;
 }) {
   const isEdit = Boolean(initial?.id);
 
   const [form, setForm] = useState<Partial<Gira>>({
-    dataISO: initial?.dataISO ?? '',
+    data: initial?.data ?? '',
     inicio: initial?.inicio ?? '18:30',
     fim: initial?.fim ?? '23:00',
     tipo: (initial?.tipo ?? 'Atendimento') as GiraTipo,
@@ -368,12 +404,12 @@ function GiraModal({
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!open) return;
     setErr(null);
     setSaving(false);
     setForm({
-      dataISO: initial?.dataISO ?? '',
+      data: initial?.data ?? '',
       inicio: initial?.inicio ?? '18:30',
       fim: initial?.fim ?? '23:00',
       tipo: (initial?.tipo ?? 'Atendimento') as GiraTipo,
@@ -388,18 +424,39 @@ function GiraModal({
     e.preventDefault();
     setErr(null);
 
-    if (!form.dataISO) return setErr('Informe a data.');
+    if (!casaId) return setErr('casa_id não definido. Defina no localStorage e recarregue.');
+    if (!form.data) return setErr('Informe a data.');
     if (!form.titulo?.trim()) return setErr('Informe o título.');
     if (!form.inicio) return setErr('Informe o horário de início.');
     if (!form.fim) return setErr('Informe o horário de término.');
 
     setSaving(true);
     try {
-      // MVP: aqui você liga no seu /api/giras (POST/PATCH)
-      // - Novo: POST /api/giras
-      // - Editar: PATCH /api/giras/:id
-      // Por enquanto só simula
-      await new Promise((r) => setTimeout(r, 400));
+      const payload = {
+        casa_id: casaId,
+        data: form.data,
+        inicio: form.inicio,
+        fim: form.fim,
+        tipo: form.tipo,
+        status: form.status,
+        titulo: form.titulo,
+        observacoes: form.observacoes || null,
+      };
+
+      const url = isEdit ? `/api/giras/${form.id}` : `/api/giras`;
+      const method = isEdit ? 'PATCH' : 'POST';
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const json = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        throw new Error(json?.error ?? 'Falha ao salvar');
+      }
 
       await onSaved();
       onClose();
@@ -429,29 +486,17 @@ function GiraModal({
           <div className="form-grid">
             <div className="field">
               <label>Data</label>
-              <input
-                type="date"
-                value={form.dataISO ?? ''}
-                onChange={(e) => setForm((p) => ({ ...p, dataISO: e.target.value }))}
-              />
+              <input type="date" value={form.data ?? ''} onChange={(e) => setForm((p) => ({ ...p, data: e.target.value }))} />
             </div>
 
             <div className="field">
               <label>Início</label>
-              <input
-                type="time"
-                value={form.inicio ?? ''}
-                onChange={(e) => setForm((p) => ({ ...p, inicio: e.target.value }))}
-              />
+              <input type="time" value={form.inicio ?? ''} onChange={(e) => setForm((p) => ({ ...p, inicio: e.target.value }))} />
             </div>
 
             <div className="field">
               <label>Fim</label>
-              <input
-                type="time"
-                value={form.fim ?? ''}
-                onChange={(e) => setForm((p) => ({ ...p, fim: e.target.value }))}
-              />
+              <input type="time" value={form.fim ?? ''} onChange={(e) => setForm((p) => ({ ...p, fim: e.target.value }))} />
             </div>
 
             <div className="field">
@@ -467,10 +512,7 @@ function GiraModal({
 
             <div className="field">
               <label>Status</label>
-              <select
-                value={(form.status ?? 'Agendada') as any}
-                onChange={(e) => setForm((p) => ({ ...p, status: e.target.value as any }))}
-              >
+              <select value={(form.status ?? 'Agendada') as any} onChange={(e) => setForm((p) => ({ ...p, status: e.target.value as any }))}>
                 {STATUS.map((s) => (
                   <option key={s.value} value={s.value}>
                     {s.label}
@@ -481,20 +523,12 @@ function GiraModal({
 
             <div className="field" style={{ gridColumn: '1 / -1' }}>
               <label>Título</label>
-              <input
-                value={form.titulo ?? ''}
-                onChange={(e) => setForm((p) => ({ ...p, titulo: e.target.value }))}
-                placeholder="Ex.: Gira de Atendimento"
-              />
+              <input value={form.titulo ?? ''} onChange={(e) => setForm((p) => ({ ...p, titulo: e.target.value }))} placeholder="Ex.: Gira de Atendimento" />
             </div>
 
             <div className="field" style={{ gridColumn: '1 / -1' }}>
               <label>Observações</label>
-              <input
-                value={(form.observacoes as any) ?? ''}
-                onChange={(e) => setForm((p) => ({ ...p, observacoes: e.target.value }))}
-                placeholder="Opcional..."
-              />
+              <input value={(form.observacoes as any) ?? ''} onChange={(e) => setForm((p) => ({ ...p, observacoes: e.target.value }))} placeholder="Opcional..." />
             </div>
           </div>
 
