@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase/server';
 
 export async function PATCH(req: Request, context: any) {
-  const supabase = createSupabaseServer();
+  const supabase = await createSupabaseServer();
+
   const body = await req.json();
   const id = context.params.id;
 
