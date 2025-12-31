@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase/server';
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: Request, context: any) {
   const supabase = createSupabaseServer();
   const body = await req.json();
+  const id = context.params.id;
 
   const { data, error } = await supabase
     .from('giras')
@@ -19,7 +17,7 @@ export async function PATCH(
       titulo: body.titulo,
       observacoes: body.observacoes ?? null,
     })
-    .eq('id', params.id)
+    .eq('id', id)
     .select('*')
     .single();
 
@@ -30,16 +28,14 @@ export async function PATCH(
   return NextResponse.json(data);
 }
 
-export async function DELETE(
-  _req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(_req: Request, context: any) {
   const supabase = createSupabaseServer();
+  const id = context.params.id;
 
   const { error } = await supabase
     .from('giras')
     .delete()
-    .eq('id', params.id);
+    .eq('id', id);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
