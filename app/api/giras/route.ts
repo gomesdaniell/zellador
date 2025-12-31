@@ -9,7 +9,8 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'casa_id obrigatório' }, { status: 400 });
   }
 
-  const supabase = createSupabaseServer();
+  const supabase = await createSupabaseServer();
+
 
   const { data, error } = await supabase
     .from('giras')
